@@ -78,7 +78,7 @@ export default function App() {
     // Run the fetch call asynchronously in the background
     (async () => {
       try {
-        const res = await fetch("http://localhost:8080/approval-request-new", {
+        const res = await fetch("https://backend-peminjam-production.up.railway.app/approval-request-new", {
           method: "POST",
           body: formData,
         });
@@ -126,7 +126,7 @@ export default function App() {
         formData.append("foto", peminjamanForm.foto);
       }
 
-      const res = await fetch("http://localhost:8080/pinjam", {
+      const res = await fetch("https://backend-peminjam-production.up.railway.app/pinjam", {
         method: "POST",
         body: formData,
       });
@@ -153,7 +153,7 @@ export default function App() {
         formData.append("foto", pengembalianForm.foto);
       }
 
-      const res = await fetch("http://localhost:8080/pengembalian", {
+      const res = await fetch("https://backend-peminjam-production.up.railway.app/pengembalian", {
         method: "POST",
         body: formData,
       });
