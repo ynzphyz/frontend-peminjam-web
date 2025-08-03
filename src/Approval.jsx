@@ -37,7 +37,11 @@ export default function Approval() {
     setPeminjamData(null);
 
     try {
-      const response = await fetch(`http://localhost:8080/get-peminjam-data?id=${encodeURIComponent(trimmedId)}`);
+      const response = await fetch(
+        `http://localhost:8080/get-peminjam-data?id=${encodeURIComponent(
+          trimmedId
+        )}`
+      );
       if (response.ok) {
         const data = await response.json();
         console.log("Received peminjam data:", data);
@@ -155,7 +159,7 @@ export default function Approval() {
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-20 rounded-xl">
             <div className="loader"></div>
             <span className="ml-4 text-indigo-900 font-semibold">
-               Please wait, your data is being processed...
+              Please wait, your data is being processed...
             </span>
           </div>
         )}
@@ -163,25 +167,32 @@ export default function Approval() {
         <h1 className="text-3xl font-extrabold mb-8 text-center text-indigo-900">
           Formulir Approval Peminjaman Alat SMKN 7 SEMARANG
         </h1>
-        
+
         {/* Data Peminjam Section */}
         <div className="mb-8 p-6 bg-blue-50 rounded-lg border border-blue-200 transition-all duration-500 ease-in-out transform hover:scale-[1.02]">
-          <h2 className="text-xl font-bold mb-4 text-blue-800">Data Peminjam</h2>
-          
+          <h2 className="text-xl font-bold mb-4 text-blue-800">
+            Data Peminjam
+          </h2>
+
           {loadingData && (
             <div className="flex items-center justify-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               <span className="ml-3 text-blue-700">Mencari data...</span>
             </div>
           )}
-          
+
           {dataNotFound && approvalForm.idPinjam && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+              role="alert"
+            >
               <strong className="font-bold">Data tidak ditemukan! </strong>
-              <span className="block sm:inline">ID Pinjam "{approvalForm.idPinjam}" tidak ditemukan.</span>
+              <span className="block sm:inline">
+                ID Pinjam "{approvalForm.idPinjam}" tidak ditemukan.
+              </span>
             </div>
           )}
-          
+
           {peminjamData && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn">
               <div>
@@ -219,19 +230,26 @@ export default function Approval() {
               {peminjamData.approvalStatus && (
                 <div>
                   <p className="text-sm text-gray-600">Status Approval</p>
-                  <p className={`font-semibold ${
-                    peminjamData.approvalStatus === "disetujui" ? "text-green-600" : 
-                    peminjamData.approvalStatus === "ditolak" ? "text-red-600" : "text-yellow-600"
-                  }`}>
+                  <p
+                    className={`font-semibold ${
+                      peminjamData.approvalStatus === "disetujui"
+                        ? "text-green-600"
+                        : peminjamData.approvalStatus === "ditolak"
+                        ? "text-red-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
                     {peminjamData.approvalStatus}
                   </p>
                 </div>
               )}
             </div>
           )}
-          
+
           {!peminjamData && !loadingData && !dataNotFound && (
-            <p className="text-gray-500 italic">Masukkan ID Pinjam untuk melihat data peminjam</p>
+            <p className="text-gray-500 italic">
+              Masukkan ID Pinjam untuk melihat data peminjam
+            </p>
           )}
         </div>
 
@@ -341,7 +359,7 @@ export default function Approval() {
               transform: translate(-50%, -20px);
             }
           }
-          
+
           @keyframes fadeIn {
             from {
               opacity: 0;
@@ -352,7 +370,7 @@ export default function Approval() {
               transform: translateY(0);
             }
           }
-          
+
           .animate-fadeIn {
             animation: fadeIn 0.5s ease-out;
           }
