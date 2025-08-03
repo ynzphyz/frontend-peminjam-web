@@ -8,6 +8,11 @@ export default function Approval() {
     statusPersetujuan: "",
   });
 
+  // State untuk data peminjam
+  const [peminjamData, setPeminjamData] = useState(null);
+  const [loadingData, setLoadingData] = useState(false);
+  const [dataNotFound, setDataNotFound] = useState(false);
+
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -20,6 +25,38 @@ export default function Approval() {
     return () => clearTimeout(timer);
   }, [success]);
 
+  // Fungsi untuk mencari data peminjam berdasarkan ID
+  const fetchPeminjamData = async (id) => {
+    if (!id) return;
+
+    const trimmedId = id.trim();
+    console.log("Fetching peminjam data for ID:", trimmedId);
+
+    setLoadingData(true);
+    setDataNotFound(false);
+    setPeminjamData(null);
+
+    try {
+      const response = await fetch(`http://localhost:8080/get-peminjam-data?id=${encodeURIComponent(trimmedId)}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Received peminjam data:", data);
+        setPeminjamData(data);
+        setDataNotFound(false);
+      } else {
+        console.log("Peminjam data not found for ID:", trimmedId);
+        setPeminjamData(null);
+        setDataNotFound(true);
+      }
+    } catch (error) {
+      console.error("Error fetching peminjam data:", error);
+      setPeminjamData(null);
+      setDataNotFound(true);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
   // Reset isian form
   const resetForm = () => {
     setApprovalForm({
@@ -27,6 +64,8 @@ export default function Approval() {
       approver: "",
       statusPersetujuan: "",
     });
+    setPeminjamData(null);
+    setDataNotFound(false);
   };
 
   const handleApprovalChange = (e) => {
@@ -35,6 +74,23 @@ export default function Approval() {
       ...approvalForm,
       [name]: value,
     });
+  };
+
+  // Handler khusus untuk perubahan ID Pinjam
+  const handleIdPinjamChange = (e) => {
+    const id = e.target.value.trim();
+    setApprovalForm({
+      ...approvalForm,
+      idPinjam: id,
+    });
+
+    // Cari data jika ID memiliki nilai
+    if (id) {
+      fetchPeminjamData(id);
+    } else {
+      setPeminjamData(null);
+      setDataNotFound(false);
+    }
   };
 
   const handleApprovalSubmit = async (e) => {
@@ -105,8 +161,80 @@ export default function Approval() {
         )}
 
         <h1 className="text-3xl font-extrabold mb-8 text-center text-indigo-900">
-          Formulir Approval Peminjaman Alat
+          Formulir Approval Peminjaman Alat SMKN 7 SEMARANG
         </h1>
+        
+        {/* Data Peminjam Section */}
+        <div className="mb-8 p-6 bg-blue-50 rounded-lg border border-blue-200 transition-all duration-500 ease-in-out transform hover:scale-[1.02]">
+          <h2 className="text-xl font-bold mb-4 text-blue-800">Data Peminjam</h2>
+          
+          {loadingData && (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-blue-700">Mencari data...</span>
+            </div>
+          )}
+          
+          {dataNotFound && approvalForm.idPinjam && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <strong className="font-bold">Data tidak ditemukan! </strong>
+              <span className="block sm:inline">ID Pinjam "{approvalForm.idPinjam}" tidak ditemukan.</span>
+            </div>
+          )}
+          
+          {peminjamData && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn">
+              <div>
+                <p className="text-sm text-gray-600">Nama</p>
+                <p className="font-semibold">{peminjamData.nama}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Kelas</p>
+                <p className="font-semibold">{peminjamData.kelas}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">NIS</p>
+                <p className="font-semibold">{peminjamData.nis}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Nama Alat</p>
+                <p className="font-semibold">{peminjamData.namaAlat}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Jumlah Alat</p>
+                <p className="font-semibold">{peminjamData.jumlahAlat}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Tanggal Pinjam</p>
+                <p className="font-semibold">{peminjamData.tanggalPinjam}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Tanggal Kembali</p>
+                <p className="font-semibold">{peminjamData.tanggalKembali}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Lama Pinjam</p>
+                <p className="font-semibold">{peminjamData.lamaPinjam}</p>
+              </div>
+              {peminjamData.approvalStatus && (
+                <div>
+                  <p className="text-sm text-gray-600">Status Approval</p>
+                  <p className={`font-semibold ${
+                    peminjamData.approvalStatus === "disetujui" ? "text-green-600" : 
+                    peminjamData.approvalStatus === "ditolak" ? "text-red-600" : "text-yellow-600"
+                  }`}>
+                    {peminjamData.approvalStatus}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {!peminjamData && !loadingData && !dataNotFound && (
+            <p className="text-gray-500 italic">Masukkan ID Pinjam untuk melihat data peminjam</p>
+          )}
+        </div>
+
         <form onSubmit={handleApprovalSubmit} className="space-y-6">
           <div>
             <label className="block font-semibold mb-2 text-indigo-800">
@@ -116,7 +244,7 @@ export default function Approval() {
               type="text"
               name="idPinjam"
               value={approvalForm.idPinjam}
-              onChange={handleApprovalChange}
+              onChange={handleIdPinjamChange}
               className="w-full border border-indigo-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
               required
             />
@@ -166,6 +294,7 @@ export default function Approval() {
           <button
             type="submit"
             className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition"
+            disabled={!peminjamData}
           >
             Kirim Approval
           </button>
@@ -211,6 +340,21 @@ export default function Approval() {
               opacity: 0;
               transform: translate(-50%, -20px);
             }
+          }
+          
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          
+          .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
           }
         `}</style>
       </div>
