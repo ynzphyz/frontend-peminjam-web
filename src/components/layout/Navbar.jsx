@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 const Navbar = ({
   activeSection,
@@ -7,6 +7,34 @@ const Navbar = ({
   toggleMenu,
   closeMenu,
 }) => {
+
+  // Ref untuk menu
+  const menuRef = useRef(null);
+
+  // Tutup menu saat scroll
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleScroll = () => closeMenu();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [menuOpen, closeMenu]);
+
+  // Tutup menu saat klik di luar area menu
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e) => {
+      // Tambahkan pengecekan untuk tombol hamburger/close
+      const hamburgerButton = e.target.closest('button[aria-label*="menu"]');
+      if (hamburgerButton) return; // Jangan tutup jika klik pada tombol hamburger
+      
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        closeMenu();
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen, closeMenu]);
+
   return (
     <>
       <nav className="bg-primary-600 text-white flex items-center justify-between py-5 px-6 md:px-10 shadow-lg font-semibold text-base tracking-wide relative z-20">
@@ -14,11 +42,11 @@ const Navbar = ({
           SMKN 7 SEMARANG
         </div>
 
-        {/* Hamburger button for mobile */}
+        {/* Hamburger/Close button for mobile */}
         <button
-          className="md:hidden flex flex-col justify-center items-center w-8 h-8 space-y-1.5 focus:outline-none"
+          className="md:hidden flex flex-col justify-center items-center w-8 h-8 space-y-1.5 focus:outline-none z-30 relative"
           onClick={toggleMenu}
-          aria-label="Toggle menu"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
         >
           <span
@@ -40,7 +68,8 @@ const Navbar = ({
 
         {/* Menu links */}
         <div
-          className={`flex-col md:flex-row md:flex md:items-center md:space-x-12 absolute md:static top-full left-0 w-full md:w-auto bg-primary-600 md:bg-transparent transition-all duration-300 ease-in-out overflow-hidden md:overflow-visible ${
+          ref={menuRef}
+          className={`flex-col md:flex-row md:flex md:items-center md:space-x-12 absolute md:static top-full left-0 w-full md:w-auto bg-primary-600 md:bg-transparent transition-all duration-300 ease-in-out overflow-hidden md:overflow-visible z-20 ${
             menuOpen ? "max-h-60 py-4 opacity-100" : "max-h-0 py-0 opacity-0"
           } md:max-h-full md:opacity-100`}
         >
