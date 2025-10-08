@@ -68,14 +68,17 @@ export default function HomePage({ onNavigate }) {
         variants={cardVariants}
       >
         <Motion.h1
-          className="text-4xl sm:text-5xl md:text-6xl font-extrabold gradient-text mb-6 text-left md:text-center leading-tight"
+          className="text-4xl sm:text-5xl md:text-6xl font-extrabold gradient-text mb-6 text-left md:text-center leading-tight flex flex-col gap-1 sm:gap-2 w-full"
           variants={itemVariants}
         >
-          <span className="whitespace-nowrap">Sistem Peminjaman</span>
-          <br />
-          <span className="text-3xl sm:text-4xl md:text-5xl">Alat Praktik</span>
-          <br />
-          <span className="text-secondary-500 text-2xl sm:text-3xl md:text-4xl font-bold">
+          <span className="block break-words max-w-full leading-tight">
+            <span>Sistem</span> <span>Peminjaman</span>
+          </span>
+          <span className="block text-3xl sm:text-4xl md:text-5xl break-words max-w-full leading-tight">
+            Alat Praktik
+          </span>
+          <span className="block h-2 sm:h-3" aria-hidden="true"></span>
+          <span className="block text-secondary-500 text-2xl sm:text-3xl md:text-4xl font-bold break-words max-w-full leading-tight mt-1 sm:mt-2">
             SMKN 7 SEMARANG
           </span>
         </Motion.h1>
