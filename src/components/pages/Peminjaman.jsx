@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { motion as Motion } from "framer-motion";
+import ConfirmationModal from "../ui/ConfirmationModal";
 
 export default function Peminjaman() {
   const [peminjamanForm, setPeminjamanForm] = useState({
@@ -16,6 +18,30 @@ export default function Peminjaman() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  };
 
   // Timer untuk sembunyikan notifikasi otomatis
   // Removed success state and fixed-position notification to avoid duplicate with toast
@@ -67,6 +93,11 @@ export default function Peminjaman() {
 
   const handlePeminjamanSubmit = async (e) => {
     e.preventDefault();
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowConfirmation(false);
     setLoading(true);
 
     try {
@@ -91,8 +122,8 @@ export default function Peminjaman() {
 
       const result = await res.text();
       toast.success(result);
-      window.scrollTo({ top: 0, behavior: "smooth" }); // Auto scroll ke atas
-      resetForm(); // Kosongkan form
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      resetForm();
     } catch (err) {
       toast.error("Gagal mengirim data peminjaman.");
       console.error(err);
@@ -102,7 +133,12 @@ export default function Peminjaman() {
   };
 
   return (
-    <>
+    <Motion.div
+      className="min-h-screen flex flex-col items-center justify-start px-6 py-12"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* NOTIFIKASI DI ATAS */}
       {/* Removed fixed-position success notification to avoid duplicate with toast */}
       {/* {success && (
@@ -126,7 +162,10 @@ export default function Peminjaman() {
       )} */}
 
       {/* FORM PEMINJAMAN */}
-      <div className="relative bg-white bg-opacity-90 backdrop-blur-md rounded-xl shadow-xl p-10 max-w-3xl mx-auto mt-8">
+      <Motion.div
+        className="relative bg-white bg-opacity-90 backdrop-blur-md rounded-xl shadow-xl p-10 max-w-3xl mx-auto mt-8"
+        variants={cardVariants}
+      >
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-20 rounded-xl">
             <div className="loader"></div>
@@ -281,7 +320,15 @@ export default function Peminjaman() {
             }
           }
         `}</style>
-      </div>
-    </>
+      </Motion.div>
+
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        onConfirm={handleConfirmSubmit}
+        formData={peminjamanForm}
+        type="peminjaman"
+      />
+    </Motion.div>
   );
 }
