@@ -117,32 +117,6 @@ const Layout = ({ children, activeSection, setActiveSection, menuOpen, toggleMen
             ease: "easeInOut"
           }}
         />
-
-        {/* Small decorative dots */}
-        <motion.div 
-          className="absolute top-20 right-20 w-4 h-4 bg-secondary-500 rounded-full"
-          animate={{ 
-            scale: [1, 1.8, 1],
-            opacity: [0.3, 0.9, 0.3]
-          }}
-          transition={{ 
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div 
-          className="absolute bottom-20 left-1/4 w-6 h-6 bg-accent-500 rounded-full"
-          animate={{ 
-            scale: [1, 1.5, 1],
-            opacity: [0.4, 1, 0.4]
-          }}
-          transition={{ 
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
       </div>
 
       {/* Glass overlay for depth */}
