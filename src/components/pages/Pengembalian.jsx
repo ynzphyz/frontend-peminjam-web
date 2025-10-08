@@ -142,7 +142,7 @@ export default function Pengembalian() {
   // Rest of the JSX remains the same
   return (
     <Motion.div
-      className="min-h-screen flex flex-col items-center justify-start px-6 py-12"
+      className="min-h-screen flex flex-col items-center justify-start px-2 sm:px-4 md:px-6 py-12"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -160,7 +160,7 @@ export default function Pengembalian() {
           </div>
         )}
 
-        <h1 className="text-3xl font-extrabold mb-8 text-center text-indigo-900">
+        <h1 className="text-3xl font-extrabold mb-8 text-left text-indigo-900">
           Formulir Pengembalian Alat SMKN 7 SEMARANG
         </h1>
 
