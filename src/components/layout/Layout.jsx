@@ -131,12 +131,12 @@ const Layout = ({ children, activeSection, setActiveSection, menuOpen, toggleMen
       />
       
       <motion.main 
-        className="flex-1 flex flex-col items-center justify-center px-4 py-12 relative z-10"
+        className="flex-1 flex flex-col items-center justify-center relative z-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <div className="w-full max-w-7xl mx-auto">
+        <div className="w-full mx-auto">
           {children}
         </div>
       </motion.main>
