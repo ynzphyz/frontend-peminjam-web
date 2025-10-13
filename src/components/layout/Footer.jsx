@@ -44,7 +44,7 @@ const Footer = () => {
 
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid md:grid-cols-3 gap-8">
           {/* Logo & Description */}
           <motion.div variants={itemVariants} className="md:col-span-1">
@@ -130,7 +130,7 @@ const Footer = () => {
           variants={itemVariants}
           className="border-t border-primary-700 mt-8 pt-8"
         >
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
             <p className="text-slate-400 text-sm">
               © {currentYear} SMKN 7 Semarang. All rights reserved.
             </p>

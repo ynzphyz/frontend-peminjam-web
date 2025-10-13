@@ -1,6 +1,7 @@
 import React from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import LogoStemba from "../../assets/Logo_STEMBA.png";
 export default function HomePage({ onNavigate }) {
   const fadeUp = {
     hidden: { opacity: 0, y: 40 },
@@ -102,43 +103,11 @@ export default function HomePage({ onNavigate }) {
           className="flex-1 flex justify-center items-center mb-10 md:mb-0"
           variants={fadeUp}
         >
-          <svg width="320" height="220" viewBox="0 0 320 220" fill="none">
-            <ellipse cx="160" cy="110" rx="140" ry="90" fill="#1e293b" />
-            <rect
-              x="60"
-              y="60"
-              width="200"
-              height="100"
-              rx="20"
-              fill="#2563eb"
-            />
-            <rect
-              x="80"
-              y="80"
-              width="160"
-              height="60"
-              rx="12"
-              fill="#0a183d"
-            />
-            <rect
-              x="100"
-              y="100"
-              width="120"
-              height="20"
-              rx="6"
-              fill="#334155"
-            />
-            <rect
-              x="100"
-              y="130"
-              width="80"
-              height="10"
-              rx="5"
-              fill="#334155"
-            />
-            <circle cx="90" cy="90" r="8" fill="#2563eb" />
-            <circle cx="230" cy="90" r="8" fill="#2563eb" />
-          </svg>
+          <img
+            src={LogoStemba}
+            alt="Illustration"
+            className="w-64"
+          />
         </motion.div>
         {/* Hero Text */}
         <motion.div className="flex-1" variants={fadeUp}>
