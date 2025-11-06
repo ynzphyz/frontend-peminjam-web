@@ -84,7 +84,6 @@ export default function Riwayat() {
 
   const filteredData = getFilteredData();
 
-  // Your existing UI code remains the same, just update the filters section:
   return (
     <motion.div
       className="min-h-screen bg-gradient-to-br from-[#0a183d] via-[#101a2b] to-[#1e293b] p-6"
@@ -92,14 +91,13 @@ export default function Riwayat() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      {/* Main Content */}
+
       <div className="max-w-7xl mx-auto">
         <div className="bg-[#16213a]/80 backdrop-blur-xl border border-blue-900 rounded-2xl shadow-2xl p-8">
           <h1 className="text-3xl font-bold text-blue-400 mb-8">
             Riwayat Peminjaman & Pengembalian Alat
           </h1>
 
-          {/* Updated Filters */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <input
               type="text"
@@ -127,7 +125,7 @@ export default function Riwayat() {
             </select>
           </div>
 
-          {/* Table */}
+      
           <div className="overflow-x-auto rounded-xl border border-blue-900">
             <table className="w-full">
               <thead>
@@ -216,7 +214,7 @@ export default function Riwayat() {
         </div>
       </div>
 
-      {/* Delete Modal */}
+  
       <AnimatePresence>
         {showDeleteModal && (
           <motion.div
@@ -259,9 +257,9 @@ export default function Riwayat() {
                   </button>
                 </div>
 
-                {/* Content */}
+                
                 <div className="space-y-5">
-                  {/* Warning Icon & Message */}
+                 
                   <div className="flex items-center gap-4 bg-red-900/10 p-4 rounded-xl border border-red-300 shadow-sm">
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100">
                       <svg
@@ -284,7 +282,7 @@ export default function Riwayat() {
                     </p>
                   </div>
 
-                  {/* Data Info */}
+                  
                   {selectedItem && (
                     <div className="bg-[#16213a]/70 rounded-xl p-4 border border-blue-900 shadow space-y-4">
                       <h4 className="font-semibold text-blue-400 border-b border-blue-900/50 pb-2">
@@ -322,7 +320,7 @@ export default function Riwayat() {
                   )}
                 </div>
 
-                {/* Footer */}
+               
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={() => setShowDeleteModal(false)}
