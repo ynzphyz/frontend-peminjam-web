@@ -3,7 +3,9 @@ import { toast } from "react-toastify";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 
+
 export default function Riwayat() {
+  // State Management
   const [historyData, setHistoryData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
@@ -13,7 +15,7 @@ export default function Riwayat() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch data
+  // Fetch Data
   const fetchHistoryData = async () => {
     setLoading(true);
     try {
@@ -33,6 +35,26 @@ export default function Riwayat() {
     fetchHistoryData();
   }, []);
 
+  // Filter Logic
+  const getFilteredData = () => {
+    return historyData.filter((item) => {
+      // Name filter - case insensitive
+      const nameMatch =
+        !searchTerm ||
+        item.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Date filter
+      const dateMatch = !selectedDate || item.date === selectedDate;
+
+      // Status filter
+      const itemStatus = item.status === "Dipinjam" ? "Disetujui" : item.status;
+      const statusMatch =
+        selectedStatus === "Semua" || itemStatus === selectedStatus;
+
+      return nameMatch && dateMatch && statusMatch;
+    });
+  };
+
   // Delete handler
   const handleDelete = async () => {
     if (!selectedItem) return;
@@ -41,9 +63,7 @@ export default function Riwayat() {
     try {
       const response = await fetch(
         `http://localhost:8080/delete-history?id=${selectedItem.id}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE" }
       );
 
       if (!response.ok) throw new Error("Gagal menghapus data");
@@ -62,20 +82,9 @@ export default function Riwayat() {
     }
   };
 
-  // Filter data
-  const filteredData = historyData.filter((item) => {
-    const matchesSearch = item.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesDate = !selectedDate || item.date === selectedDate;
-    const matchesStatus =
-      selectedStatus === "Semua" ||
-      (item.status === "Dipinjam"
-        ? "Disetujui" === selectedStatus
-        : item.status === selectedStatus);
-    return matchesSearch && matchesDate && matchesStatus;
-  });
+  const filteredData = getFilteredData();
 
+  // Your existing UI code remains the same, just update the filters section:
   return (
     <motion.div
       className="min-h-screen bg-gradient-to-br from-[#0a183d] via-[#101a2b] to-[#1e293b] p-6"
@@ -90,7 +99,7 @@ export default function Riwayat() {
             Riwayat Peminjaman & Pengembalian Alat
           </h1>
 
-          {/* Filters */}
+          {/* Updated Filters */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <input
               type="text"
