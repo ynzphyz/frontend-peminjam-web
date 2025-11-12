@@ -4,8 +4,8 @@ import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 
 
+
 export default function Riwayat() {
-  // State Management
   const [historyData, setHistoryData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
@@ -15,74 +15,61 @@ export default function Riwayat() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch Data
-  const fetchHistoryData = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("http://localhost:8080/history");
-      if (!response.ok) throw new Error("Gagal mengambil data");
-      const data = await response.json();
-      setHistoryData(data);
-    } catch (err) {
-      toast.error("Gagal memuat data riwayat");
-      console.error("Error fetching data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchHistoryData();
+    setLoading(true);
+    fetch("http://localhost:8080/history")
+      .then((res) => {
+        if (!res.ok) throw new Error("Gagal mengambil data");
+        return res.json();
+      })
+      .then((data) => setHistoryData(data))
+      .catch(() => toast.error("Gagal memuat data riwayat"))
+      .finally(() => setLoading(false));
   }, []);
 
-  // Filter Logic
-  const getFilteredData = () => {
-    return historyData.filter((item) => {
-      // Name filter - case insensitive
-      const nameMatch =
-        !searchTerm ||
-        item.name.toLowerCase().includes(searchTerm.toLowerCase());
+  // Pencarian nama: substring, case insensitive
+  function matchName(name, term) {
+    if (!term) return true;
+    return name.toLowerCase().includes(term.toLowerCase());
+  }
 
-      // Date filter
-      const dateMatch = !selectedDate || item.date === selectedDate;
+  const filteredData = historyData.filter((item) => {
+    // Nama: persis
+    const nameMatch = matchName(item.name, searchTerm);
 
-      // Status filter
-      const itemStatus = item.status === "Dipinjam" ? "Disetujui" : item.status;
-      const statusMatch =
-        selectedStatus === "Semua" || itemStatus === selectedStatus;
+    // Tanggal
+    const dateMatch = !selectedDate || item.date === selectedDate;
 
-      return nameMatch && dateMatch && statusMatch;
-    });
-  };
+    // Status
+    const itemStatus = item.status === "Dipinjam" ? "Disetujui" : item.status;
+    const statusMatch =
+      selectedStatus === "Semua" || itemStatus === selectedStatus;
 
-  // Delete handler
+    return nameMatch && dateMatch && statusMatch;
+  });
+
+  // Hapus data
   const handleDelete = async () => {
     if (!selectedItem) return;
-
     setIsDeleting(true);
     try {
-      const response = await fetch(
+      const res = await fetch(
         `http://localhost:8080/delete-history?id=${selectedItem.id}`,
         { method: "DELETE" }
       );
-
-      if (!response.ok) throw new Error("Gagal menghapus data");
-
+      if (!res.ok) throw new Error();
       setHistoryData((prev) =>
         prev.filter((item) => item.id !== selectedItem.id)
       );
       toast.success("Data berhasil dihapus");
       setShowDeleteModal(false);
-    } catch (err) {
+    } catch {
       toast.error("Gagal menghapus data");
-      console.error("Error deleting data:", err);
     } finally {
       setIsDeleting(false);
       setSelectedItem(null);
     }
   };
-
-  const filteredData = getFilteredData();
 
   return (
     <motion.div
@@ -91,13 +78,11 @@ export default function Riwayat() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-
       <div className="max-w-7xl mx-auto">
         <div className="bg-[#16213a]/80 backdrop-blur-xl border border-blue-900 rounded-2xl shadow-2xl p-8">
           <h1 className="text-3xl font-bold text-blue-400 mb-8">
             Riwayat Peminjaman & Pengembalian Alat
           </h1>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <input
               type="text"
@@ -124,8 +109,6 @@ export default function Riwayat() {
               <option value="Dikembalikan">Dikembalikan</option>
             </select>
           </div>
-
-      
           <div className="overflow-x-auto rounded-xl border border-blue-900">
             <table className="w-full">
               <thead>
@@ -213,8 +196,6 @@ export default function Riwayat() {
           </div>
         </div>
       </div>
-
-  
       <AnimatePresence>
         {showDeleteModal && (
           <motion.div
@@ -232,7 +213,6 @@ export default function Riwayat() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-blue-400">
                     Konfirmasi Hapus
@@ -256,10 +236,7 @@ export default function Riwayat() {
                     </svg>
                   </button>
                 </div>
-
-                
                 <div className="space-y-5">
-                 
                   <div className="flex items-center gap-4 bg-red-900/10 p-4 rounded-xl border border-red-300 shadow-sm">
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100">
                       <svg
@@ -281,8 +258,6 @@ export default function Riwayat() {
                       tidak dapat dibatalkan.
                     </p>
                   </div>
-
-                  
                   {selectedItem && (
                     <div className="bg-[#16213a]/70 rounded-xl p-4 border border-blue-900 shadow space-y-4">
                       <h4 className="font-semibold text-blue-400 border-b border-blue-900/50 pb-2">
@@ -319,8 +294,6 @@ export default function Riwayat() {
                     </div>
                   )}
                 </div>
-
-               
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={() => setShowDeleteModal(false)}
