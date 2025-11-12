@@ -3,8 +3,6 @@ import { toast } from "react-toastify";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 
-
-
 export default function Riwayat() {
   const [historyData, setHistoryData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,14 +28,17 @@ export default function Riwayat() {
   // Pencarian nama: substring, case insensitive
   function matchName(name, term) {
     if (!term) return true;
-    return name.toLowerCase().includes(term.toLowerCase());
+    return name
+      .toLowerCase()
+      .split(/\s+/)
+      .some((w) => w === term.toLowerCase());
   }
 
   const filteredData = historyData.filter((item) => {
-    // Nama: persis
+    // Nama: substring
     const nameMatch = matchName(item.name, searchTerm);
 
-    // Tanggal
+    // Tanggal: pastikan format sama (yyyy-mm-dd)
     const dateMatch = !selectedDate || item.date === selectedDate;
 
     // Status
