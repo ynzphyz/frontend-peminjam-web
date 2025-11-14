@@ -14,55 +14,87 @@ export default function Riwayat() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    fetch("http://localhost:8080/history")
-      .then((res) => {
-        if (!res.ok) throw new Error("Gagal mengambil data");
-        return res.json();
-      })
-      .then((data) => setHistoryData(data))
-      .catch(() => toast.error("Gagal memuat data riwayat"))
-      .finally(() => setLoading(false));
+    fetchHistory();
   }, []);
 
-  // Pencarian nama: substring, case insensitive
-  function matchName(name, term) {
-    if (!term) return true;
-    return name.toLowerCase().includes(term.toLowerCase());
+  const fetchHistory = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:8080/history");
+      if (!response.ok) throw new Error("Gagal mengambil data");
+
+      const data = await response.json();
+      console.log("Data dari backend:", data); // Debug
+
+      setHistoryData(data || []);
+    } catch (error) {
+      console.error("Error fetching history:", error);
+      toast.error("Gagal memuat data riwayat");
+      setHistoryData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fungsi untuk konversi status backend ke label UI
+  function getUiStatus(status) {
+    if (!status) return "Unknown";
+    const statusStr = String(status).toLowerCase();
+    if (statusStr.includes("dipinjam")) return "Disetujui";
+    if (statusStr.includes("menunggu")) return "Menunggu Persetujuan";
+    if (statusStr.includes("tolak")) return "Ditolak";
+    if (statusStr.includes("kembali")) return "Dikembalikan";
+    return status;
   }
 
+  // Filter data - debug lebih detail
   const filteredData = historyData.filter((item) => {
-    // Nama: substring
-    const nameMatch = matchName(item.name, searchTerm);
+    const nameMatch =
+      !searchTerm ||
+      (item.name && item.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    // Tanggal: harus sama persis
     const dateMatch = !selectedDate || item.date === selectedDate;
 
-    // Status: bandingkan langsung dengan status asli
-    let uiStatus = item.status;
-    if (item.status === "Dipinjam") uiStatus = "Disetujui";
+    const uiStatus = getUiStatus(item.status);
     const statusMatch =
       selectedStatus === "Semua" || uiStatus === selectedStatus;
+
+    // Debug log
+    if (!nameMatch || !dateMatch || !statusMatch) {
+      console.log("Filter result:", {
+        name: item.name,
+        searchTerm,
+        nameMatch,
+        date: item.date,
+        selectedDate,
+        dateMatch,
+        status: item.status,
+        uiStatus,
+        selectedStatus,
+        statusMatch,
+      });
+    }
 
     return nameMatch && dateMatch && statusMatch;
   });
 
-  // Hapus data
   const handleDelete = async () => {
     if (!selectedItem) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(
+      const response = await fetch(
         `http://localhost:8080/delete-history?id=${selectedItem.id}`,
         { method: "DELETE" }
       );
-      if (!res.ok) throw new Error();
+      if (!response.ok) throw new Error("Gagal menghapus");
+
       setHistoryData((prev) =>
         prev.filter((item) => item.id !== selectedItem.id)
       );
       toast.success("Data berhasil dihapus");
       setShowDeleteModal(false);
-    } catch {
+    } catch (error) {
+      console.error("Error deleting:", error);
       toast.error("Gagal menghapus data");
     } finally {
       setIsDeleting(false);
@@ -73,15 +105,17 @@ export default function Riwayat() {
   return (
     <motion.div
       className="min-h-screen bg-gradient-to-br from-[#0a183d] via-[#101a2b] to-[#1e293b] p-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial="hidden"
+      animate="visible"
       exit={{ opacity: 0 }}
     >
       <div className="max-w-7xl mx-auto">
         <div className="bg-[#16213a]/80 backdrop-blur-xl border border-blue-900 rounded-2xl shadow-2xl p-8">
-          <h1 className="text-3xl font-bold text-blue-400 mb-8">
+          <motion.h1 className="text-3xl font-bold text-blue-400 mb-8">
             Riwayat Peminjaman & Pengembalian Alat
-          </h1>
+          </motion.h1>
+
+          {/* Filter Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <input
               type="text"
@@ -108,6 +142,8 @@ export default function Riwayat() {
               <option value="Dikembalikan">Dikembalikan</option>
             </select>
           </div>
+
+          {/* Table Section */}
           <div className="overflow-x-auto rounded-xl border border-blue-900">
             <table className="w-full">
               <thead>
@@ -148,31 +184,33 @@ export default function Riwayat() {
                       colSpan={6}
                       className="px-4 py-8 text-center text-gray-400"
                     >
-                      Tidak ada data
+                      Tidak ada data (Total data: {historyData.length})
                     </td>
                   </tr>
                 ) : (
-                  filteredData.map((item) => (
-                    <tr key={item.id} className="hover:bg-blue-900/20">
+                  filteredData.map((item, idx) => (
+                    <tr
+                      key={`${item.id}-${idx}`}
+                      className="hover:bg-blue-900/20"
+                    >
                       <td className="px-4 py-3 text-white">{item.id}</td>
                       <td className="px-4 py-3 text-white">{item.name}</td>
                       <td className="px-4 py-3 text-white">{item.date}</td>
                       <td className="px-4 py-3">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                          ${
-                            item.status === "Dipinjam"
-                              ? "bg-green-100 text-green-800"
-                              : item.status === "Menunggu Persetujuan"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : item.status === "Ditolak"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-blue-100 text-blue-800"
-                          }`}
+                            ${
+                              getUiStatus(item.status) === "Disetujui"
+                                ? "bg-green-100 text-green-800"
+                                : getUiStatus(item.status) ===
+                                  "Menunggu Persetujuan"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : getUiStatus(item.status) === "Ditolak"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-blue-100 text-blue-800"
+                            }`}
                         >
-                          {item.status === "Dipinjam"
-                            ? "Disetujui"
-                            : item.status}
+                          {getUiStatus(item.status)}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-white">{item.type}</td>
@@ -195,6 +233,8 @@ export default function Riwayat() {
           </div>
         </div>
       </div>
+
+      {/* Delete Modal */}
       <AnimatePresence>
         {showDeleteModal && (
           <motion.div
@@ -205,20 +245,22 @@ export default function Riwayat() {
             onClick={() => !isDeleting && setShowDeleteModal(false)}
           >
             <motion.div
-              className="bg-[#16213a]/90 border border-blue-900 rounded-xl shadow-2xl max-w-md w-full mx-4 flex flex-col"
+              className="bg-[#16213a]/90 border border-blue-900 rounded-xl shadow-2xl max-w-md w-full"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6">
+                {/* Header Modal */}
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-blue-400">
                     Konfirmasi Hapus
                   </h3>
                   <button
                     onClick={() => setShowDeleteModal(false)}
-                    className="text-blue-300 hover:text-blue-400 transition-colors duration-200"
+                    disabled={isDeleting}
+                    className="text-gray-400 hover:text-gray-300 transition-colors"
                   >
                     <svg
                       className="w-6 h-6"
@@ -235,81 +277,97 @@ export default function Riwayat() {
                     </svg>
                   </button>
                 </div>
-                <div className="space-y-5">
-                  <div className="flex items-center gap-4 bg-red-900/10 p-4 rounded-xl border border-red-300 shadow-sm">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100">
-                      <svg
-                        className="w-6 h-6 text-red-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-sm text-red-200">
-                      Apakah Anda yakin ingin menghapus data ini? Tindakan ini
-                      tidak dapat dibatalkan.
-                    </p>
-                  </div>
-                  {selectedItem && (
-                    <div className="bg-[#16213a]/70 rounded-xl p-4 border border-blue-900 shadow space-y-4">
-                      <h4 className="font-semibold text-blue-400 border-b border-blue-900/50 pb-2">
-                        Data yang akan dihapus
-                      </h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-xs text-blue-300 mb-1">Nama</p>
-                          <p className="font-semibold text-white">
-                            {selectedItem.name}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-blue-300 mb-1">Tanggal</p>
-                          <p className="font-semibold text-white">
-                            {selectedItem.date}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-blue-300 mb-1">Status</p>
-                          <p className="font-semibold text-white">
-                            {selectedItem.status === "Dipinjam"
-                              ? "Disetujui"
-                              : selectedItem.status}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-blue-300 mb-1">Jenis</p>
-                          <p className="font-semibold text-white">
-                            {selectedItem.type}
-                          </p>
-                        </div>
+
+                {/* Warning Message */}
+                <div className="flex items-start gap-3 bg-red-900/20 border border-red-700 rounded-lg p-4 mb-6">
+                  <svg
+                    className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <p className="text-sm text-red-200">
+                    Apakah Anda yakin ingin menghapus data ini? Tindakan ini
+                    tidak dapat dibatalkan.
+                  </p>
+                </div>
+
+                {/* Data Preview */}
+                {selectedItem && (
+                  <div className="bg-[#101a2b]/50 rounded-lg border border-blue-800 p-4 mb-6">
+                    <h4 className="text-sm font-semibold text-blue-300 mb-4 pb-2 border-b border-blue-800">
+                      Data yang akan dihapus:
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <span className="text-sm text-gray-400">No</span>
+                        <span className="text-sm font-medium text-white">
+                          {selectedItem.id}
+                        </span>
+                      </div>
+                      <div className="flex items-start justify-between">
+                        <span className="text-sm text-gray-400">Nama</span>
+                        <span className="text-sm font-medium text-white">
+                          {selectedItem.name}
+                        </span>
+                      </div>
+                      <div className="flex items-start justify-between">
+                        <span className="text-sm text-gray-400">Tanggal</span>
+                        <span className="text-sm font-medium text-white">
+                          {selectedItem.date}
+                        </span>
+                      </div>
+                      <div className="flex items-start justify-between">
+                        <span className="text-sm text-gray-400">Status</span>
+                        <span
+                          className={`text-xs font-medium px-2.5 py-0.5 rounded-full
+                            ${
+                              getUiStatus(selectedItem.status) === "Disetujui"
+                                ? "bg-green-100 text-green-800"
+                                : getUiStatus(selectedItem.status) ===
+                                  "Menunggu Persetujuan"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : getUiStatus(selectedItem.status) === "Ditolak"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-blue-100 text-blue-800"
+                            }`}
+                        >
+                          {getUiStatus(selectedItem.status)}
+                        </span>
+                      </div>
+                      <div className="flex items-start justify-between">
+                        <span className="text-sm text-gray-400">Jenis</span>
+                        <span className="text-sm font-medium text-white">
+                          {selectedItem.type}
+                        </span>
                       </div>
                     </div>
-                  )}
-                </div>
-                <div className="flex gap-3 mt-6">
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
                   <button
                     onClick={() => setShowDeleteModal(false)}
                     disabled={isDeleting}
-                    className="flex-1 px-4 py-2.5 border border-blue-900 rounded-lg text-blue-400 hover:bg-blue-900/30 transition-colors duration-200 font-medium"
+                    className="flex-1 px-4 py-2.5 border border-blue-900 rounded-lg text-blue-400 hover:bg-blue-900/30 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Batal
                   </button>
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium shadow-sm flex items-center justify-center"
+                    className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isDeleting ? (
-                      <span className="flex items-center">
+                      <>
                         <svg
-                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          className="animate-spin h-4 w-4"
                           fill="none"
                           viewBox="0 0 24 24"
                         >
@@ -328,9 +386,24 @@ export default function Riwayat() {
                           />
                         </svg>
                         Menghapus...
-                      </span>
+                      </>
                     ) : (
-                      "Hapus"
+                      <>
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                        Hapus
+                      </>
                     )}
                   </button>
                 </div>

@@ -133,6 +133,11 @@ export default function Approval() {
     },
   };
 
+  const itemVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.7 } },
+  };
+
   return (
     <Motion.div
       className="min-h-screen relative overflow-x-hidden text-white bg-gradient-to-br from-[#0a183d] via-[#101a2b] to-[#1e293b]"
@@ -166,11 +171,14 @@ export default function Approval() {
             </div>
           )}
 
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-8 text-left text-blue-400">
+          <Motion.h1
+            className="text-3xl md:text-4xl font-extrabold mb-8 text-left text-blue-400"
+            variants={itemVariants}
+          >
             Formulir Approval Peminjaman Alat SMKN 7 SEMARANG
-          </h1>
+          </Motion.h1>
 
-          <form onSubmit={handleApprovalSubmit} className="space-y-6">
+          <Motion.form onSubmit={handleApprovalSubmit} className="space-y-6" variants={itemVariants}>
             <div>
               <label className="block font-semibold mb-2 text-blue-400">
                 ID Pinjam
@@ -226,14 +234,15 @@ export default function Approval() {
                 ))}
               </div>
             </div>
-            <button
+            <Motion.button
               type="submit"
               className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold text-lg shadow-lg hover:bg-blue-700 transition"
               disabled={loading}
+              variants={itemVariants}
             >
               Kirim Approval
-            </button>
-          </form>
+            </Motion.button>
+          </Motion.form>
 
           <style jsx>{`
             .loader {
