@@ -28,23 +28,21 @@ export default function Riwayat() {
   // Pencarian nama: substring, case insensitive
   function matchName(name, term) {
     if (!term) return true;
-    return name
-      .toLowerCase()
-      .split(/\s+/)
-      .some((w) => w === term.toLowerCase());
+    return name.toLowerCase().includes(term.toLowerCase());
   }
 
   const filteredData = historyData.filter((item) => {
     // Nama: substring
     const nameMatch = matchName(item.name, searchTerm);
 
-    // Tanggal: pastikan format sama (yyyy-mm-dd)
+    // Tanggal: harus sama persis
     const dateMatch = !selectedDate || item.date === selectedDate;
 
-    // Status
-    const itemStatus = item.status === "Dipinjam" ? "Disetujui" : item.status;
+    // Status: bandingkan langsung dengan status asli
+    let uiStatus = item.status;
+    if (item.status === "Dipinjam") uiStatus = "Disetujui";
     const statusMatch =
-      selectedStatus === "Semua" || itemStatus === selectedStatus;
+      selectedStatus === "Semua" || uiStatus === selectedStatus;
 
     return nameMatch && dateMatch && statusMatch;
   });
