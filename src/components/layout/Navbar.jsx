@@ -1,254 +1,234 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from "framer-motion";
 
-const Navbar = ({
-  activeSection,
-  setActiveSection,
-  menuOpen,
-  toggleMenu,
-  closeMenu,
-}) => {
-  // Ref untuk menu
+const Navbar = () => {
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const closeTimeoutRef = useRef(null);
 
-  // Tutup menu saat scroll
   useEffect(() => {
-    if (!menuOpen) return;
-    const handleScroll = () => closeMenu();
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [menuOpen, closeMenu]);
-
-  // Tutup menu saat klik di luar area menu
-  useEffect(() => {
-    if (!menuOpen) return;
-    const handleClick = (e) => {
-      // Tambahkan pengecekan untuk tombol hamburger/close
-      const hamburgerButton = e.target.closest('button[aria-label*="menu"]');
-      if (hamburgerButton) return; // Jangan tutup jika klik pada tombol hamburger
-      
+    const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
-        closeMenu();
+        const hamburgerButton = document.querySelector("[aria-label='Toggle menu']");
+        if (hamburgerButton && hamburgerButton.contains(e.target)) {
+          return;
+        }
+        setMenuOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [menuOpen, closeMenu]);
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [menuOpen]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (menuOpen) {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [menuOpen]);
+
+  const toggleMenu = (e) => {
+    e.stopPropagation();
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    setMenuOpen((prev) => !prev);
+  };
+
+  const closeMenu = (e) => {
+    e?.stopPropagation();
+    closeTimeoutRef.current = setTimeout(() => {
+      setMenuOpen(false);
+    }, 0);
+  };
+
+  const handleLinkClick = (e) => {
+    e.stopPropagation();
+    closeMenu(e);
+  };
+
+  const navLinks = [
+    { path: "/", label: "Home" },
+    { path: "/form-peminjaman", label: "Peminjaman" },
+    { path: "/form-approval", label: "Approval" },
+    { path: "/form-pengembalian", label: "Pengembalian" },
+    { path: "/riwayat", label: "Riwayat" },
+  ];
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <>
-      {/* Updated Navbar with dark theme */}
-      <nav className="bg-slate-800 text-white shadow-xl border-b border-slate-700 font-medium text-base tracking-wide relative z-20">
-        <div className="max-w-7xl mx-auto flex items-center justify-between py-4 px-6 md:px-10">
-          <div className="cursor-default select-none font-bold text-xl text-white">
-            SMKN 7 SEMARANG
-          </div>
+      {/* Premium Navbar */}
+      <motion.nav
+        className="bg-gradient-to-r from-[#051e3e] via-[#0a2851] to-[#051e3e] border-b-2 border-blue-500/60 backdrop-blur-xl sticky top-0 z-40 shadow-2xl"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4">
+            {/* Logo Section */}
+            <Link to="/" className="flex items-center gap-3 group focus:outline-none">
+              {/* Logo Badge */}
+              <motion.div
+                className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-blue-500/40"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                S7
+              </motion.div>
 
-          {/* Improved Hamburger/Close button for mobile */}
-          <button
-            className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 z-30 relative"
-            onClick={toggleMenu}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-          >
-            <span
-              className={`block h-0.5 w-5 bg-white rounded transform transition-all duration-300 ease-in-out ${
-                menuOpen ? "rotate-45 translate-y-1.5" : ""
-              }`}
-            ></span>
-            <span
-              className={`block h-0.5 w-5 bg-white rounded transition-all duration-300 ease-in-out ${
-                menuOpen ? "opacity-0" : "opacity-100"
-              } mt-1`}
-            ></span>
-            <span
-              className={`block h-0.5 w-5 bg-white rounded transform transition-all duration-300 ease-in-out ${
-                menuOpen ? "-rotate-45 -translate-y-1.5" : ""
-              } mt-1`}
-            ></span>
-          </button>
+              {/* Brand Text */}
+              <div className="hidden sm:flex flex-col">
+                <motion.h1
+                  className="text-base font-bold text-blue-300 leading-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  SMKN 7
+                </motion.h1>
+                <motion.p
+                  className="text-xs font-semibold text-gray-400"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.15 }}
+                >
+                  SEMARANG
+                </motion.p>
+              </div>
+            </Link>
 
-          {/* Desktop Menu Links */}
-          <div className="hidden md:flex md:items-center md:space-x-8">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("home");
-                window.scrollTo(0, 0);
-              }}
-              className={`px-3 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider cursor-pointer select-none transition-all duration-200 ${
-                activeSection === "home" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-1">
+              {navLinks.map((link, idx) => (
+                <motion.div
+                  key={link.path}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1, duration: 0.4 }}
+                >
+                  <Link
+                    to={link.path}
+                    className={`relative px-4 py-2 rounded-lg font-semibold text-base transition-all duration-300 ${
+                      isActive(link.path)
+                        ? "text-blue-200 bg-blue-600/50"
+                        : "text-gray-200 hover:text-blue-300"
+                    }`}
+                  >
+                    {link.label}
+
+                    {/* Active Indicator */}
+                    {isActive(link.path) && (
+                      <motion.div
+                        className="absolute -bottom-1 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
+                        layoutId="navbar-indicator"
+                      />
+                    )}
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Mobile Hamburger Button */}
+            <motion.button
+              onClick={toggleMenu}
+              className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-blue-600/30 transition-all"
+              aria-label="Toggle menu"
+              aria-expanded={menuOpen}
+              type="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.92 }}
             >
-              Home
-            </a>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("peminjaman");
-                window.scrollTo(0, 0);
-              }}
-              className={`px-3 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider cursor-pointer transition-all duration-200 ${
-                activeSection === "peminjaman" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
-            >
-              Peminjaman
-            </a>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("approval");
-                window.scrollTo(0, 0);
-              }}
-              className={`px-3 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider cursor-pointer transition-all duration-200 ${
-                activeSection === "approval" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
-            >
-              Approval
-            </a>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("pengembalian");
-                window.scrollTo(0, 0);
-              }}
-              className={`px-3 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider cursor-pointer transition-all duration-200 ${
-                activeSection === "pengembalian" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
-            >
-              Pengembalian
-            </a>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("riwayat");
-                window.scrollTo(0, 0);
-              }}
-              className={`px-3 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider cursor-pointer transition-all duration-200 ${
-                activeSection === "riwayat" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
-            >
-              Riwayat
-            </a>
+              <div className="w-6 h-5 flex flex-col justify-between">
+                <motion.span
+                  className="w-full h-0.5 bg-blue-400 rounded-full"
+                  animate={{
+                    rotate: menuOpen ? 45 : 0,
+                    y: menuOpen ? 8 : 0,
+                  }}
+                  transition={{ duration: 0.3 }}
+                />
+                <motion.span
+                  className="w-full h-0.5 bg-blue-400 rounded-full"
+                  animate={{ opacity: menuOpen ? 0 : 1 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <motion.span
+                  className="w-full h-0.5 bg-blue-400 rounded-full"
+                  animate={{
+                    rotate: menuOpen ? -45 : 0,
+                    y: menuOpen ? -8 : 0,
+                  }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+            </motion.button>
           </div>
         </div>
 
-        {/* Improved Mobile Menu */}
-        <div
-          ref={menuRef}
-          className={`md:hidden bg-slate-800 border-t border-slate-700 transition-all duration-300 ease-in-out overflow-hidden ${
-            menuOpen 
-              ? "max-h-80 opacity-100 shadow-xl" 
-              : "max-h-0 opacity-0"
-          }`}
-        >
-          <div className="px-6 py-4 space-y-1">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("home");
-                closeMenu();
-                window.scrollTo(0, 0);
-              }}
-              className={`block px-4 py-3 rounded-lg font-semibold text-base cursor-pointer transition-all duration-200 ${
-                activeSection === "home" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
+        {/* Mobile Menu Dropdown */}
+        <AnimatePresence mode="wait">
+          {menuOpen && (
+            <motion.div
+              ref={menuRef}
+              className="md:hidden bg-[#0a2851]/80 backdrop-blur-lg border-t border-blue-500/30"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={(e) => e.stopPropagation()}
             >
-              Home
-            </a>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("peminjaman");
-                closeMenu();
-                window.scrollTo(0, 0);
-              }}
-              className={`block px-4 py-3 rounded-lg font-semibold text-base cursor-pointer transition-all duration-200 ${
-                activeSection === "peminjaman" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
-            >
-              Peminjaman
-            </a>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("approval");
-                closeMenu();
-                window.scrollTo(0, 0);
-              }}
-              className={`block px-4 py-3 rounded-lg font-semibold text-base cursor-pointer transition-all duration-200 ${
-                activeSection === "approval" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
-            >
-              Approval
-            </a>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("pengembalian");
-                closeMenu();
-                window.scrollTo(0, 0);
-              }}
-              className={`block px-4 py-3 rounded-lg font-semibold text-base cursor-pointer transition-all duration-200 ${
-                activeSection === "pengembalian" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
-            >
-              Pengembalian
-            </a>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveSection("riwayat");
-                closeMenu();
-                window.scrollTo(0, 0);
-              }}
-              className={`block px-4 py-3 rounded-lg font-semibold text-base cursor-pointer transition-all duration-200 ${
-                activeSection === "riwayat" 
-                  ? "text-blue-400 bg-slate-700" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              }`}
-            >
-              Riwayat
-            </a>
-          </div>
-        </div>
-      </nav>
+              <div className="px-4 py-4 space-y-2">
+                {navLinks.map((link, idx) => (
+                  <motion.div
+                    key={link.path}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                  >
+                    <Link
+                      to={link.path}
+                      onClick={handleLinkClick}
+                      className={`block px-4 py-3 rounded-lg font-semibold text-base transition-all ${
+                        isActive(link.path)
+                          ? "text-blue-300 bg-blue-600/30 border border-blue-500/50"
+                          : "text-gray-300 hover:text-blue-300 hover:bg-blue-600/20"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
 
-      {/* Improved Backdrop overlay */}
-      {menuOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-10 md:hidden"
-          onClick={closeMenu}
-          aria-hidden="true"
-        ></div>
-      )}
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+            onClick={closeMenu}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

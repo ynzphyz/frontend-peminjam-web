@@ -1,49 +1,83 @@
-import React, { useState } from "react";
-import HomePage from "./components/pages/HomePage";
-import Peminjaman from "./components/pages/Peminjaman";
-import Pengembalian from "./components/pages/Pengembalian";
-import Approval from "./components/pages/Approval";
-import Riwayat from "./components/pages/Riwayat";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import PageTransition from "./components/PageTransition";
+
+// Import Layout
 import Layout from "./components/layout/Layout";
 
-export default function App() {
-  const [activeSection, setActiveSection] = useState("home");
-  const [menuOpen, setMenuOpen] = useState(false);
+// Import Pages
+import HomePage from "./components/pages/HomePage";
+import Peminjaman from "./components/pages/Peminjaman";
+import Approval from "./components/pages/Approval";
+import Pengembalian from "./components/pages/Pengembalian";
+import Riwayat from "./components/pages/Riwayat";
 
-  const renderSection = () => {
-    switch (activeSection) {
-      case "home":
-        return <HomePage onNavigate={setActiveSection} />;
-      case "peminjaman":
-        return <Peminjaman />;
-      case "pengembalian":
-        return <Pengembalian />;
-      case "approval":
-        return <Approval />;
-      case "riwayat":
-        return <Riwayat />;
-      default:
-        return <HomePage onNavigate={setActiveSection} />;
-    }
-  };
-
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
-  const closeMenu = () => {
-    setMenuOpen(false);
-  };
-
+function App() {
   return (
-    <Layout
-      activeSection={activeSection}
-      setActiveSection={setActiveSection}
-      menuOpen={menuOpen}
-      toggleMenu={toggleMenu}
-      closeMenu={closeMenu}
-    >
-      {renderSection()}
-    </Layout>
+    <Router>
+      <Layout>
+        <AnimatePresence mode="wait">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <PageTransition>
+                  <HomePage />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/form-peminjaman"
+              element={
+                <PageTransition>
+                  <Peminjaman />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/form-approval"
+              element={
+                <PageTransition>
+                  <Approval />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/form-pengembalian"
+              element={
+                <PageTransition>
+                  <Pengembalian />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/riwayat"
+              element={
+                <PageTransition>
+                  <Riwayat />
+                </PageTransition>
+              }
+            />
+          </Routes>
+        </AnimatePresence>
+      </Layout>
+
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </Router>
   );
 }
+
+export default App;
