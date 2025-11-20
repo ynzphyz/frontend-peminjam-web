@@ -3,29 +3,28 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
 export default function Layout({ children }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleMenuClick = () => {
-    console.log("Menu clicked, current state:", menuOpen);
-    setMenuOpen(!menuOpen);
+    setSidebarOpen(!sidebarOpen);
   };
 
   const handleCloseMenu = () => {
-    setMenuOpen(false);
+    setSidebarOpen(false);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0a183d]">
-      {/* Navbar dengan props yang benar */}
+      {/* Navbar */}
       <Navbar
         onMenuClick={handleMenuClick}
-        menuOpen={menuOpen}
+        menuOpen={sidebarOpen}
         closeMenu={handleCloseMenu}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         {/* Sidebar */}
-        <Sidebar isOpen={menuOpen} onClose={handleCloseMenu} />
+        <Sidebar isOpen={sidebarOpen} onClose={handleCloseMenu} />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto w-full">{children}</main>
