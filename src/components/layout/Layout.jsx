@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
+import Footer from "./Footer";
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -29,6 +30,9 @@ export default function Layout({ children }) {
         {/* Main Content */}
         <main className="flex-1 overflow-auto w-full">{children}</main>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
