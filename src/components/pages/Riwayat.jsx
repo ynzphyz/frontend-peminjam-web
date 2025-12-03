@@ -3,8 +3,8 @@ import { toast } from "react-toastify";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import ReactDOM from "react-dom";
+import { Trash2, RefreshCw } from "lucide-react";
 
-// Variasi animasi untuk container utama
 const containerVariants = {
   hidden: {
     opacity: 0,
@@ -30,7 +30,6 @@ const containerVariants = {
   },
 };
 
-// Variasi animasi untuk child elements
 const itemVariants = {
   hidden: {
     opacity: 0,
@@ -46,8 +45,7 @@ const itemVariants = {
   },
 };
 
-// Variasi animasi untuk table rows
-const rowVariants = {
+const cardVariants = {
   hidden: {
     opacity: 0,
     x: -20,
@@ -61,6 +59,10 @@ const rowVariants = {
       ease: "easeOut",
     },
   }),
+  exit: {
+    opacity: 0,
+    x: 20,
+  },
 };
 
 export default function Riwayat() {
@@ -80,15 +82,17 @@ export default function Riwayat() {
   const fetchHistory = async () => {
     setLoading(true);
     try {
+      console.log("🔍 Fetching dari: http://localhost:8080/history");
+
       const response = await fetch("http://localhost:8080/history");
       if (!response.ok) throw new Error("Gagal mengambil data");
 
       const data = await response.json();
-      console.log("Data dari backend:", data); // Debug
+      console.log("✅ Data dari backend:", data);
 
       setHistoryData(data || []);
     } catch (error) {
-      console.error("Error fetching history:", error);
+      console.error("❌ Error fetching history:", error);
       toast.error("Gagal memuat data riwayat");
       setHistoryData([]);
     } finally {
@@ -98,42 +102,33 @@ export default function Riwayat() {
 
   // Fungsi untuk konversi status backend ke label UI
   function getUiStatus(status) {
-    if (!status) return "Unknown";
+    if (!status) return "Menunggu";
     const statusStr = String(status).toLowerCase();
-    if (statusStr.includes("dipinjam")) return "Disetujui";
-    if (statusStr.includes("menunggu")) return "Menunggu Persetujuan";
-    if (statusStr.includes("tolak")) return "Ditolak";
-    if (statusStr.includes("kembali")) return "Dikembalikan";
+    if (statusStr.includes("dipinjam") || statusStr.includes("approved"))
+      return "Disetujui";
+    if (statusStr.includes("menunggu") || statusStr.includes("pending"))
+      return "Menunggu Persetujuan";
+    if (statusStr.includes("tolak") || statusStr.includes("rejected"))
+      return "Ditolak";
+    if (statusStr.includes("kembali") || statusStr.includes("dikembalikan"))
+      return "Dikembalikan";
     return status;
   }
 
-  // Filter data - debug lebih detail
+  // Filter data
   const filteredData = historyData.filter((item) => {
     const nameMatch =
       !searchTerm ||
-      (item.name && item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      (item.name &&
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.namaAlat &&
+        item.namaAlat.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const dateMatch = !selectedDate || item.date === selectedDate;
 
     const uiStatus = getUiStatus(item.status);
     const statusMatch =
       selectedStatus === "Semua" || uiStatus === selectedStatus;
-
-    // Debug log
-    if (!nameMatch || !dateMatch || !statusMatch) {
-      console.log("Filter result:", {
-        name: item.name,
-        searchTerm,
-        nameMatch,
-        date: item.date,
-        selectedDate,
-        dateMatch,
-        status: item.status,
-        uiStatus,
-        selectedStatus,
-        statusMatch,
-      });
-    }
 
     return nameMatch && dateMatch && statusMatch;
   });
@@ -151,15 +146,46 @@ export default function Riwayat() {
       setHistoryData((prev) =>
         prev.filter((item) => item.id !== selectedItem.id)
       );
-      toast.success("Data berhasil dihapus");
+      toast.success("✅ Data berhasil dihapus");
       setShowDeleteModal(false);
     } catch (error) {
-      console.error("Error deleting:", error);
-      toast.error("Gagal menghapus data");
+      console.error("❌ Error deleting:", error);
+      toast.error("❌ Gagal menghapus data");
     } finally {
       setIsDeleting(false);
       setSelectedItem(null);
     }
+  };
+
+  // Get status color & icon
+  const getStatusBadge = (status) => {
+    const uiStatus = getUiStatus(status);
+
+    if (uiStatus === "Disetujui") {
+      return {
+        color: "bg-green-900/30 border-green-500/30 text-green-300",
+        icon: "✓",
+      };
+    } else if (uiStatus === "Menunggu Persetujuan") {
+      return {
+        color: "bg-yellow-900/30 border-yellow-500/30 text-yellow-300",
+        icon: "⏳",
+      };
+    } else if (uiStatus === "Ditolak") {
+      return {
+        color: "bg-red-900/30 border-red-500/30 text-red-300",
+        icon: "✗",
+      };
+    } else if (uiStatus === "Dikembalikan") {
+      return {
+        color: "bg-blue-900/30 border-blue-500/30 text-blue-300",
+        icon: "↩️",
+      };
+    }
+    return {
+      color: "bg-blue-900/30 border-blue-500/30 text-blue-300",
+      icon: "●",
+    };
   };
 
   return (
@@ -171,166 +197,233 @@ export default function Riwayat() {
       exit="exit"
     >
       <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div className="mb-12" variants={itemVariants}>
+          <h1 className="text-4xl md:text-5xl font-black mb-2">
+            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              Riwayat Peminjaman
+            </span>
+          </h1>
+          <p className="text-gray-300 text-lg">
+            Kelola semua history peminjaman & pengembalian alat Anda
+          </p>
+          <div className="h-1 w-20 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full mt-4" />
+        </motion.div>
+
+        {/* Main Card */}
         <motion.div
           className="bg-[#16213a]/80 backdrop-blur-xl border border-blue-900 rounded-2xl shadow-2xl p-8"
           variants={itemVariants}
         >
-          <motion.h1
-            className="text-3xl font-bold text-blue-400 mb-8"
-            variants={itemVariants}
-          >
-            Riwayat Peminjaman & Pengembalian Alat
-          </motion.h1>
-
           {/* Filter Section */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+            className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
             variants={itemVariants}
           >
             <input
               type="text"
-              placeholder="Cari berdasarkan nama..."
+              placeholder="Cari nama atau alat..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-[#101a2b] border border-blue-800 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+              className="bg-[#101a2b] border border-blue-800 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
             />
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-[#101a2b] border border-blue-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+              className="bg-[#101a2b] border border-blue-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
             />
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="bg-[#101a2b] border border-blue-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+              className="bg-[#101a2b] border border-blue-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
             >
               <option value="Semua">Semua Status</option>
-              <option value="Disetujui">Disetujui</option>
-              <option value="Menunggu Persetujuan">Menunggu Persetujuan</option>
-              <option value="Ditolak">Ditolak</option>
-              <option value="Dikembalikan">Dikembalikan</option>
+              <option value="Disetujui">✓ Disetujui</option>
+              <option value="Menunggu Persetujuan">⏳ Menunggu</option>
+              <option value="Ditolak">✗ Ditolak</option>
+              <option value="Dikembalikan">↩️ Dikembalikan</option>
             </select>
+
+            {/* Refresh Button */}
+            <motion.button
+              onClick={fetchHistory}
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
+              Refresh
+            </motion.button>
           </motion.div>
 
-          {/* Table Section */}
-          <motion.div
-            className="overflow-x-auto rounded-xl border border-blue-900"
-            variants={itemVariants}
-          >
-            <table className="w-full">
-              <thead>
-                <tr className="bg-blue-900/50">
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-blue-300">
-                    No
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-blue-300">
-                    Nama
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-blue-300">
-                    Tanggal
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-blue-300">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-blue-300">
-                    Jenis
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-blue-300">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-blue-900/30">
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-8 text-center text-gray-400"
+          {/* Cards Section */}
+          <motion.div className="space-y-4" variants={containerVariants}>
+            {loading ? (
+              <motion.div
+                className="flex items-center justify-center py-20"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <span className="text-gray-400 font-semibold">
+                  ⏳ Memuat data...
+                </span>
+              </motion.div>
+            ) : filteredData.length === 0 ? (
+              <motion.div
+                className="text-center py-20"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <p className="text-gray-400 text-lg">
+                  📭 Tidak ada data ({historyData.length} total)
+                </p>
+              </motion.div>
+            ) : (
+              <AnimatePresence mode="popLayout">
+                {filteredData.map((item, idx) => {
+                  const statusBadge = getStatusBadge(item.status);
+                  return (
+                    <motion.div
+                      key={`${item.id}-${idx}`}
+                      className="bg-gradient-to-r from-[#0f3460]/50 to-[#101a2b]/50 border border-blue-900/30 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-300 group"
+                      custom={idx}
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      whileHover={{ scale: 1.02, y: -2 }}
                     >
-                      <motion.div
-                        animate={{ opacity: [0.5, 1, 0.5] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
-                        Memuat data...
-                      </motion.div>
-                    </td>
-                  </tr>
-                ) : filteredData.length === 0 ? (
-                  <motion.tr
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <td
-                      colSpan={6}
-                      className="px-4 py-8 text-center text-gray-400"
-                    >
-                      Tidak ada data (Total data: {historyData.length})
-                    </td>
-                  </motion.tr>
-                ) : (
-                  <AnimatePresence mode="popLayout">
-                    {filteredData.map((item, idx) => (
-                      <motion.tr
-                        key={`${item.id}-${idx}`}
-                        className="hover:bg-blue-900/20 transition-colors duration-200"
-                        custom={idx}
-                        variants={rowVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit={{ opacity: 0, x: 20 }}
-                      >
-                        <td className="px-4 py-3 text-white">{item.id}</td>
-                        <td className="px-4 py-3 text-white">{item.name}</td>
-                        <td className="px-4 py-3 text-white">{item.date}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-300
-                              ${
-                                getUiStatus(item.status) === "Disetujui"
-                                  ? "bg-green-100 text-green-800"
-                                  : getUiStatus(item.status) ===
-                                    "Menunggu Persetujuan"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : getUiStatus(item.status) === "Ditolak"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-blue-100 text-blue-800"
-                              }`}
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        {/* Left Content */}
+                        <div className="flex-1 space-y-3">
+                          <div className="space-y-1">
+                            <h3 className="text-lg font-bold text-white">
+                              {item.name || "Tidak Diketahui"}
+                            </h3>
+                            <p className="text-sm text-gray-400">
+                              🆔 ID:{" "}
+                              <span className="text-blue-300 font-semibold">
+                                {item.id}
+                              </span>
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                            <div className="text-gray-400">
+                              🔧{" "}
+                              <span className="text-gray-300">
+                                {item.namaAlat || "-"}
+                              </span>
+                            </div>
+                            <div className="text-gray-400">
+                              📅{" "}
+                              <span className="text-gray-300">{item.date}</span>
+                            </div>
+                            <div className="text-gray-400">
+                              📋{" "}
+                              <span className="text-gray-300">{item.type}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status & Actions */}
+                        <div className="flex items-center gap-4 md:flex-col md:items-end">
+                          <motion.span
+                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border transition-all ${statusBadge.color}`}
+                            whileHover={{ scale: 1.05 }}
                           >
-                            {getUiStatus(item.status)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-white">{item.type}</td>
-                        <td className="px-4 py-3">
+                            {statusBadge.icon} {getUiStatus(item.status)}
+                          </motion.span>
+
                           <motion.button
                             onClick={() => {
                               setSelectedItem(item);
                               setShowDeleteModal(true);
                             }}
-                            className="px-3 py-1 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/50 text-red-300 rounded-lg font-semibold transition-all text-sm"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                           >
+                            <Trash2 size={16} />
                             Hapus
                           </motion.button>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </AnimatePresence>
-                )}
-              </tbody>
-            </table>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            )}
           </motion.div>
+
+          {/* Stats */}
+          {historyData.length > 0 && (
+            <motion.div
+              className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 border-t border-blue-900/30"
+              variants={containerVariants}
+            >
+              {[
+                {
+                  label: "Total",
+                  value: historyData.length,
+                  icon: "📊",
+                  color: "from-blue-600 to-blue-400",
+                },
+                {
+                  label: "Disetujui",
+                  value: historyData.filter(
+                    (d) => getUiStatus(d.status) === "Disetujui"
+                  ).length,
+                  icon: "✓",
+                  color: "from-green-600 to-green-400",
+                },
+                {
+                  label: "Menunggu",
+                  value: historyData.filter(
+                    (d) => getUiStatus(d.status) === "Menunggu Persetujuan"
+                  ).length,
+                  icon: "⏳",
+                  color: "from-yellow-600 to-yellow-400",
+                },
+                {
+                  label: "Ditolak",
+                  value: historyData.filter(
+                    (d) => getUiStatus(d.status) === "Ditolak"
+                  ).length,
+                  icon: "✗",
+                  color: "from-red-600 to-red-400",
+                },
+              ].map((stat, idx) => (
+                <motion.div
+                  key={idx}
+                  className="bg-[#101a2b]/50 border border-blue-800 rounded-lg p-4 text-center"
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                >
+                  <p className="text-gray-400 text-xs font-semibold mb-1">
+                    {stat.label}
+                  </p>
+                  <p
+                    className={`text-2xl font-black bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
+                    {stat.icon} {stat.value}
+                  </p>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </motion.div>
       </div>
 
-      {/* Delete Modal - Render via Portal */}
+      {/* Delete Modal - Portal */}
       {ReactDOM.createPortal(
         <AnimatePresence>
           {showDeleteModal && (
             <motion.div
-              className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -346,7 +439,7 @@ export default function Riwayat() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-6">
-                  {/* Header Modal */}
+                  {/* Header */}
                   <div className="flex items-center justify-between mb-6">
                     <motion.h3
                       className="text-xl font-bold text-blue-400"
@@ -354,7 +447,7 @@ export default function Riwayat() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 }}
                     >
-                      Konfirmasi Hapus
+                      ⚠️ Konfirmasi Hapus
                     </motion.h3>
                     <motion.button
                       onClick={() => setShowDeleteModal(false)}
@@ -363,40 +456,18 @@ export default function Riwayat() {
                       whileHover={{ rotate: 90 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
+                      ✕
                     </motion.button>
                   </div>
 
-                  {/* Warning Message */}
+                  {/* Warning */}
                   <motion.div
                     className="flex items-start gap-3 bg-red-900/20 border border-red-700 rounded-lg p-4 mb-6"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
                   >
-                    <svg
-                      className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <span className="text-2xl flex-shrink-0">🗑️</span>
                     <p className="text-sm text-red-200">
                       Apakah Anda yakin ingin menghapus data ini? Tindakan ini
                       tidak dapat dibatalkan.
@@ -406,58 +477,44 @@ export default function Riwayat() {
                   {/* Data Preview */}
                   {selectedItem && (
                     <motion.div
-                      className="bg-[#101a2b]/50 rounded-lg border border-blue-800 p-4 mb-6"
+                      className="bg-[#101a2b]/50 border border-blue-800 rounded-lg p-4 mb-6 space-y-3"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
                     >
-                      <h4 className="text-sm font-semibold text-blue-300 mb-4 pb-2 border-b border-blue-800">
-                        Data yang akan dihapus:
-                      </h4>
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <span className="text-sm text-gray-400">No</span>
-                          <span className="text-sm font-medium text-white">
-                            {selectedItem.id}
-                          </span>
-                        </div>
-                        <div className="flex items-start justify-between">
-                          <span className="text-sm text-gray-400">Nama</span>
-                          <span className="text-sm font-medium text-white">
-                            {selectedItem.name}
-                          </span>
-                        </div>
-                        <div className="flex items-start justify-between">
-                          <span className="text-sm text-gray-400">Tanggal</span>
-                          <span className="text-sm font-medium text-white">
-                            {selectedItem.date}
-                          </span>
-                        </div>
-                        <div className="flex items-start justify-between">
-                          <span className="text-sm text-gray-400">Status</span>
-                          <span
-                            className={`text-xs font-medium px-2.5 py-0.5 rounded-full transition-all duration-300
-                              ${
-                                getUiStatus(selectedItem.status) === "Disetujui"
-                                  ? "bg-green-100 text-green-800"
-                                  : getUiStatus(selectedItem.status) ===
-                                    "Menunggu Persetujuan"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : getUiStatus(selectedItem.status) ===
-                                    "Ditolak"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-blue-100 text-blue-800"
-                              }`}
-                          >
-                            {getUiStatus(selectedItem.status)}
-                          </span>
-                        </div>
-                        <div className="flex items-start justify-between">
-                          <span className="text-sm text-gray-400">Jenis</span>
-                          <span className="text-sm font-medium text-white">
-                            {selectedItem.type}
-                          </span>
-                        </div>
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm text-gray-400">ID:</span>
+                        <span className="text-sm font-semibold text-white">
+                          {selectedItem.id}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm text-gray-400">Nama:</span>
+                        <span className="text-sm font-semibold text-white">
+                          {selectedItem.name}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm text-gray-400">Alat:</span>
+                        <span className="text-sm font-semibold text-white">
+                          {selectedItem.namaAlat || "-"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm text-gray-400">Tanggal:</span>
+                        <span className="text-sm font-semibold text-white">
+                          {selectedItem.date}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm text-gray-400">Status:</span>
+                        <span
+                          className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
+                            getStatusBadge(selectedItem.status).color
+                          }`}
+                        >
+                          {getUiStatus(selectedItem.status)}
+                        </span>
                       </div>
                     </motion.div>
                   )}
@@ -487,44 +544,20 @@ export default function Riwayat() {
                     >
                       {isDeleting ? (
                         <>
-                          <svg
-                            className="animate-spin h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
+                          <motion.span
+                            animate={{ rotate: 360 }}
+                            transition={{
+                              duration: 1,
+                              repeat: Infinity,
+                              ease: "linear",
+                            }}
                           >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            />
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            />
-                          </svg>
+                            ⟳
+                          </motion.span>
                           Menghapus...
                         </>
                       ) : (
-                        <>
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                          Hapus
-                        </>
+                        <>🗑️ Hapus Data</>
                       )}
                     </motion.button>
                   </motion.div>
