@@ -87,7 +87,7 @@ export default function Peminjaman() {
     }
 
     try {
-      fetch("http://localhost:8080/peminjaman-request-new", {
+      fetch("http://localhost:8080/pinjam", {
         method: "POST",
         body: formData,
       });

@@ -28,16 +28,27 @@ export default function Pengembalian() {
   const fetchPeminjamanData = async (id) => {
     if (!id) return null;
     try {
-      const response = await fetch(
-        `http://localhost:8080/get-peminjaman-data?id=${id}`
+      console.log(
+        "🔍 Fetching data dari: http://localhost:8080/get-peminjam-data?id=" +
+          id
       );
+
+      const response = await fetch(
+        `http://localhost:8080/get-peminjam-data?id=${id}`
+      );
+
       if (response.ok) {
         const data = await response.json();
+        console.log("✅ Data ditemukan:", data);
         return data;
+      } else {
+        console.error("❌ Response status:", response.status);
+        toast.error("Data peminjaman tidak ditemukan!");
       }
       return null;
     } catch (error) {
-      console.error("Error fetching peminjaman data:", error);
+      console.error("❌ Error fetching peminjaman data:", error);
+      toast.error("Gagal mengambil data peminjaman");
       return null;
     }
   };
@@ -71,15 +82,26 @@ export default function Pengembalian() {
 
   const handlePengembalianSubmit = async (e) => {
     e.preventDefault();
+
+    if (!pengembalianForm.idPeminjaman.trim()) {
+      toast.error("⚠️ ID Peminjaman tidak boleh kosong!");
+      return;
+    }
+
+    setLoading(true);
     const peminjamanData = await fetchPeminjamanData(
       pengembalianForm.idPeminjaman
     );
+    setLoading(false);
+
     if (!peminjamanData) {
-      toast.error("Data peminjaman tidak ditemukan!");
+      toast.error("❌ Data peminjaman tidak ditemukan!");
       return;
     }
+
     setFormData({
       ...pengembalianForm,
+      idPeminjaman: pengembalianForm.idPeminjaman,
       peminjamanData: peminjamanData,
     });
     setShowConfirmation(true);
@@ -101,21 +123,28 @@ export default function Pengembalian() {
     }
 
     try {
-      fetch("http://localhost:8080/pengembalian-request-new", {
+      console.log("📤 Mengirim ke backend...");
+      const response = await fetch("http://localhost:8080/pengembalian", {
         method: "POST",
         body: formDataToSend,
       });
 
-      setTimeout(() => {
+      if (response.ok) {
+        console.log("✅ Pengembalian berhasil!");
         toast.success("✅ Pengembalian berhasil dikirim!");
         setSuccess(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
         resetForm();
         setLoading(false);
-      }, 1500);
+      } else {
+        const errorText = await response.text();
+        console.error("❌ Error response:", response.status, errorText);
+        toast.error("❌ Gagal mengirim pengembalian.");
+        setLoading(false);
+      }
     } catch (err) {
+      console.error("❌ Pengembalian request error:", err);
       toast.error("❌ Gagal mengirim pengembalian.");
-      console.error("Pengembalian request error:", err);
       setLoading(false);
     }
   };

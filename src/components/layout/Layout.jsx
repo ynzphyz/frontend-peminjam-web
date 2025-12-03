@@ -27,8 +27,8 @@ export default function Layout({ children }) {
         {/* Sidebar dengan z-40 */}
         <Sidebar isOpen={sidebarOpen} onClose={handleCloseMenu} />
 
-        {/* Main content - jangan punya z-index tinggi */}
-        <main className="flex-1 overflow-auto w-full relative">{children}</main>
+        {/* Main content */}
+        <main className="flex-1 overflow-auto w-full">{children}</main>
       </div>
 
       <Footer />
