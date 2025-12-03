@@ -213,7 +213,7 @@
   }
 }
 
-/* Toast Container - Pastikan di atas semua */
+/* Toast Container - Sesuai theme */
 .toast-container {
   position: fixed !important;
   top: 20px !important;
@@ -224,80 +224,128 @@
   padding: 0 !important;
 }
 
-/* Toast Item */
+/* Toast Item - Dark Theme */
 .toast-custom {
-  background-color: #16213a !important;
-  border: 1px solid #0f3460 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+  background: linear-gradient(135deg, #16213a 0%, #0f3460 100%) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(59, 130, 246, 0.1) !important;
   padding: 16px 20px !important;
   margin-bottom: 12px !important;
-  min-width: 350px !important;
+  min-width: 320px !important;
   z-index: 9999 !important;
+  backdrop-filter: blur(10px) !important;
 }
 
 /* Toast Body */
 .toast-body-custom {
-  color: #fff !important;
+  color: #e0e7ff !important;
   font-weight: 500 !important;
   padding: 0 !important;
+  font-size: 14px !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif !important;
 }
 
-/* Toast Success */
+/* Toast Success - Hijau */
 .Toastify__toast--success {
-  background-color: #10b981 !important;
+  background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
 }
 
 .Toastify__toast--success .Toastify__toast-icon {
-  color: #fff !important;
+  color: #10b981 !important;
 }
 
-/* Toast Error */
+/* Toast Error - Merah */
 .Toastify__toast--error {
-  background-color: #ef4444 !important;
+  background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%) !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
 }
 
 .Toastify__toast--error .Toastify__toast-icon {
-  color: #fff !important;
+  color: #fca5a5 !important;
 }
 
-/* Toast Warning */
+/* Toast Warning - Kuning */
 .Toastify__toast--warning {
-  background-color: #f59e0b !important;
+  background: linear-gradient(135deg, #78350f 0%, #d97706 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
 }
 
-/* Toast Info */
+.Toastify__toast--warning .Toastify__toast-icon {
+  color: #fcd34d !important;
+}
+
+/* Toast Info - Biru */
 .Toastify__toast--info {
-  background-color: #3b82f6 !important;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+}
+
+.Toastify__toast--info .Toastify__toast-icon {
+  color: #93c5fd !important;
 }
 
 /* Close Button */
 .Toastify__close-button {
-  color: #fff !important;
-  opacity: 0.7 !important;
+  color: #e0e7ff !important;
+  opacity: 0.6 !important;
+  padding: 4px !important;
 }
 
 .Toastify__close-button:hover {
   opacity: 1 !important;
 }
 
+.Toastify__close-button > svg {
+  height: 18px !important;
+  width: 18px !important;
+}
+
 /* Progress Bar */
 .Toastify__progress-bar {
   background: linear-gradient(to right, #3b82f6, #1d4ed8) !important;
-  height: 3px !important;
+  height: 2px !important;
 }
 
-/* Pastikan ToastContainer z-index tinggi */
+.Toastify__toast--success .Toastify__progress-bar {
+  background: linear-gradient(to right, #10b981, #059669) !important;
+}
+
+.Toastify__toast--error .Toastify__progress-bar {
+  background: linear-gradient(to right, #ef4444, #dc2626) !important;
+}
+
+.Toastify__toast--warning .Toastify__progress-bar {
+  background: linear-gradient(to right, #f59e0b, #d97706) !important;
+}
+
+/* Container Wrapper */
 .Toastify__toast-container {
   position: fixed !important;
   z-index: 9999 !important;
   top: 20px !important;
   right: 20px !important;
+  width: auto !important;
+  padding: 0 !important;
 }
 
 .Toastify__toast {
   z-index: 9999 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    sans-serif !important;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .toast-custom {
+    min-width: 280px !important;
+    margin-right: 10px !important;
+  }
+
+  .toast-container {
+    right: 10px !important;
+    top: 10px !important;
+  }
 }

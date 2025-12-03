@@ -35,18 +35,6 @@ const Sidebar = ({ isOpen, onClose }) => {
     },
   };
 
-  const overlayVariants = {
-    closed: {
-      opacity: 0,
-      transition: {
-        delay: 0.2,
-      },
-    },
-    open: {
-      opacity: 1,
-    },
-  };
-
   const linkVariants = {
     closed: { x: -20, opacity: 0 },
     open: { x: 0, opacity: 1 },
@@ -57,18 +45,16 @@ const Sidebar = ({ isOpen, onClose }) => {
       {isOpen && (
         <>
           {/* Overlay */}
-          <motion.div
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
-            variants={overlayVariants}
-            initial="closed"
-            animate="open"
-            exit="closed"
+          <div
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
             onClick={onClose}
           />
 
           {/* Sidebar */}
           <motion.div
-            className="fixed top-0 left-0 h-full w-80 bg-gradient-to-b from-[#051e3e] via-[#0a2851] to-[#051e3e] border-r-2 border-blue-500/60 backdrop-blur-xl shadow-2xl z-50"
+            className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
+              isOpen ? "w-64" : "-translate-x-full"
+            }`}
             variants={sidebarVariants}
             initial="closed"
             animate="open"
@@ -146,9 +132,11 @@ const Sidebar = ({ isOpen, onClose }) => {
 
                       {/* Icon Placeholder - you can add specific icons later */}
                       <div className="w-5 h-5 mr-3 flex items-center justify-center">
-                        <div className={`w-2 h-2 rounded-full ${
-                          isActive(link.path) ? "bg-blue-400" : "bg-gray-400"
-                        }`} />
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            isActive(link.path) ? "bg-blue-400" : "bg-gray-400"
+                          }`}
+                        />
                       </div>
 
                       <span className="flex-1">{link.label}</span>

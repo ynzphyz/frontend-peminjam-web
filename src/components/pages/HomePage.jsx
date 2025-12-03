@@ -1,359 +1,300 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-import LogoStemba from "../../assets/Logo_STEMBA.png";
-export default function HomePage({ onNavigate }) {
-  const fadeUp = {
-    hidden: { opacity: 0, y: 40 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.7 } },
+import { ArrowRight, CheckCircle, Zap, Shield, Clock } from "lucide-react";
+import logoStemba from "../../assets/Logo_STEMBA.png";
+
+export default function HomePage() {
+  const navigate = useNavigate();
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
   };
 
   const features = [
     {
-      icon: (
-        <div className="bg-blue-900 text-blue-400 w-12 h-12 rounded-full flex items-center justify-center shadow">
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 10V3L4 14h7v7l9-11h-7z"
-            />
-          </svg>
-        </div>
-      ),
-      title: "Proses Instan",
-      desc: "Peminjaman alat hanya butuh beberapa klik, tanpa ribet.",
+      icon: Zap,
+      title: "Proses Cepat",
+      description:
+        "Proses peminjaman yang efisien dan mudah hanya dalam beberapa klik",
     },
     {
-      icon: (
-        <div className="bg-green-900 text-green-400 w-12 h-12 rounded-full flex items-center justify-center shadow">
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 11c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm0 0V7m0 4v4m0 0h4m-4 0H8"
-            />
-          </svg>
-        </div>
-      ),
-      title: "Terdata & Aman",
-      desc: "Semua alat terpantau, terintegrasi dengan database sekolah.",
+      icon: Shield,
+      title: "Aman & Terpercaya",
+      description:
+        "Sistem keamanan tingkat tinggi untuk melindungi data sekolah Anda",
     },
     {
-      icon: (
-        <div className="bg-purple-900 text-purple-400 w-12 h-12 rounded-full flex items-center justify-center shadow">
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 17v-2a4 4 0 014-4h3m-7 6v2a4 4 0 004 4h3m-7-6H5a4 4 0 01-4-4V7a4 4 0 014-4h3m7 6h2a4 4 0 014 4v3a4 4 0 01-4 4h-3"
-            />
-          </svg>
-        </div>
-      ),
-      title: "Realtime & Otomatis",
-      desc: "Update status alat langsung, tanpa manual input.",
+      icon: Clock,
+      title: "Manajemen Waktu",
+      description:
+        "Tracking real-time untuk setiap peminjaman dan pengembalian alat",
+    },
+    {
+      icon: CheckCircle,
+      title: "Approval Otomatis",
+      description:
+        "Sistem approval yang terstruktur dan transparan untuk setiap request",
     },
   ];
 
+  const stats = [
+    { number: "500+", label: "Alat Tersedia" },
+    { number: "1000+", label: "Peminjaman/Bulan" },
+    { number: "99%", label: "Tingkat Kepuasan" },
+    { number: "24/7", label: "Dukungan Sistem" },
+  ];
+
   return (
-    <motion.div
-      className="min-h-screen bg-gradient-to-br from-[#0a183d] via-[#101a2b] to-[#1e293b] relative overflow-x-hidden text-white"
-      initial="hidden"
-      animate="visible"
-      variants={{
-        hidden: {},
-        visible: { transition: { staggerChildren: 0.15 } },
-      }}
-    >
-      {/* Animated Blobs */}
-      <motion.div
-        className="absolute top-0 left-0 w-[400px] h-[400px] bg-blue-900 opacity-30 rounded-full blur-3xl z-0"
-        animate={{ scale: [1, 1.2, 1], x: [0, 40, 0], y: [0, 20, 0] }}
-        transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-purple-900 opacity-30 rounded-full blur-3xl z-0"
-        animate={{ scale: [1, 1.1, 1], x: [0, -30, 0], y: [0, -20, 0] }}
-        transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
-      />
-
-      {/* Hero Section */}
-      <section className="relative px-6 pt-20 pb-10 md:py-32 flex flex-col md:flex-row items-center max-w-7xl mx-auto z-10">
-        {/* SVG Illustration */}
+    <div className="min-h-screen bg-gradient-to-br from-[#0a183d] via-[#101a2b] to-[#1e293b] overflow-hidden">
+      {/* Background Animation */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="flex-1 flex justify-center items-center mb-10 md:mb-0"
-          variants={fadeUp}
-        >
-          <img
-            src={LogoStemba}
-            alt="Illustration"
-            className="w-64"
-          />
-        </motion.div>
-        {/* Hero Text */}
-        <motion.div className="flex-1" variants={fadeUp}>
-          <h2 className="text-blue-400 text-lg font-semibold uppercase mb-4 tracking-wide">
-            SMKN 7 SEMARANG
-          </h2>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
-            Sistem Peminjaman <br />
-            <span className="text-blue-400">Alat Praktik</span>
-          </h1>
-          <p className="text-slate-300 text-lg mb-8 max-w-xl">
-            Platform digital modern untuk memudahkan proses peminjaman alat
-            praktik. Terintegrasi langsung dengan database sekolah, cepat dan
-            aman.
-          </p>
-          <div className="flex gap-4 flex-col sm:flex-row">
-            <button
-              onClick={() => onNavigate("peminjaman")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold text-lg shadow-lg transition-all duration-300"
-            >
-              Mulai Pinjam
-            </button>
-            <button
-              onClick={() => onNavigate("riwayat")}
-              className="bg-transparent border border-blue-400 text-blue-400 hover:bg-blue-900 px-8 py-3 rounded-xl font-semibold text-lg shadow transition-all duration-300"
-            >
-              Lihat Riwayat
-            </button>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* About Section */}
-      <section className="px-6 py-16 max-w-5xl mx-auto z-10">
+          className="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+          animate={{ y: [0, 100, 0] }}
+          transition={{ duration: 7, repeat: Infinity }}
+        />
         <motion.div
-          className="bg-[#16213a] rounded-2xl shadow-xl p-8 text-center border border-blue-900"
-          variants={fadeUp}
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-blue-400 mb-4">
-            Tentang Sistem Peminjaman
-          </h2>
-          <p className="text-slate-300 text-lg mb-2">
-            Sistem ini dibuat untuk memudahkan siswa dan guru dalam proses
-            peminjaman alat praktik di SMKN 7 Semarang.
-          </p>
-          <p className="text-slate-400 text-base">
-            Semua data alat, peminjam, dan pengembalian tercatat otomatis dan
-            terintegrasi dengan database sekolah. Proses lebih cepat,
-            transparan, dan aman.
-          </p>
-        </motion.div>
-      </section>
+          className="absolute top-40 right-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+          animate={{ y: [0, -100, 0] }}
+          transition={{ duration: 9, repeat: Infinity }}
+        />
+      </div>
 
-      {/* How It Works Section */}
-      <section className="px-6 py-16 max-w-6xl mx-auto z-10">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-blue-400">
-          Cara Kerja Sistem
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            {
-              step: "1",
-              title: "Isi Formulir",
-              desc: "Lengkapi data peminjaman dengan informasi yang diperlukan.",
-              icon: "📝",
-            },
-            {
-              step: "2",
-              title: "Tunggu Approval",
-              desc: "Menunggu persetujuan dari kepala bengkel atau penanggung jawab.",
-              icon: "⏳",
-            },
-            {
-              step: "3",
-              title: "Ambil Alat",
-              desc: "Setelah disetujui, alat dapat diambil sesuai jadwal.",
-              icon: "📦",
-            },
-            {
-              step: "4",
-              title: "Kembalikan",
-              desc: "Kembalikan alat dalam kondisi baik sesuai jadwal.",
-              icon: "✅",
-            },
-          ].map((step, idx) => (
-            <motion.div
-              key={idx}
-              className="bg-[#16213a] rounded-xl p-8 text-center shadow-lg border border-blue-900 hover:bg-blue-900 transition-all duration-300"
-              variants={fadeUp}
-              whileHover={{ scale: 1.05 }}
-            >
-              <div className="w-14 h-14 mx-auto mb-4 flex items-center justify-center text-2xl bg-blue-900 rounded-full border-2 border-blue-400">
-                {step.icon}
-              </div>
-              <h3 className="text-lg font-semibold text-blue-400 mb-2">
-                {step.title}
-              </h3>
-              <p className="text-slate-300 text-sm">{step.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="px-6 py-16 max-w-6xl mx-auto z-10">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-blue-400">
-          Fitur Unggulan
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {features.map((feature, idx) => (
-            <motion.div
-              key={idx}
-              className="bg-[#16213a] rounded-2xl shadow-lg p-8 flex flex-col items-center border border-blue-900 hover:bg-blue-900 transition-all duration-300"
-              variants={fadeUp}
-              whileHover={{ y: -8, scale: 1.07 }}
-            >
-              {feature.icon}
-              <h3 className="text-lg font-semibold text-blue-400 mt-6 mb-2 text-center">
-                {feature.title}
-              </h3>
-              <p className="text-slate-300 text-center">{feature.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Statistic Section */}
-      <section className="px-6 py-12 max-w-5xl mx-auto z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-          {[
-            { number: "500+", label: "Alat Tersedia", color: "text-blue-400" },
-            {
-              number: "1000+",
-              label: "Peminjaman Sukses",
-              color: "text-green-400",
-            },
-            {
-              number: "99%",
-              label: "Tingkat Kepuasan",
-              color: "text-purple-400",
-            },
-          ].map((stat, idx) => (
-            <motion.div
-              key={idx}
-              className="bg-[#16213a] rounded-2xl shadow-xl p-8 flex flex-col items-center border border-blue-900 hover:bg-blue-900 transition-all duration-300"
-              variants={fadeUp}
-              whileHover={{
-                scale: 1.07,
-                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-              }}
-            >
-              <div
-                className={`text-3xl md:text-4xl font-bold mb-2 ${stat.color}`}
-              >
-                {stat.number}
-              </div>
-              <div className="text-slate-300 font-medium text-base">
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="px-6 py-16 max-w-4xl mx-auto z-10">
-        <h2 className="text-2xl font-bold text-center mb-10 text-blue-400">
-          FAQ
-        </h2>
-        <div className="space-y-4">
-          {[
-            {
-              q: "Berapa lama batas waktu peminjaman alat?",
-              a: "Maksimal 7 hari untuk alat praktik reguler, dan 14 hari untuk project besar.",
-            },
-            {
-              q: "Bagaimana jika alat rusak saat dipinjam?",
-              a: "Segera laporkan ke kepala bengkel. Kerusakan akan dievaluasi dan ditentukan tindak lanjutnya.",
-            },
-            {
-              q: "Apakah bisa memperpanjang masa peminjaman?",
-              a: "Ya, bisa mengajukan perpanjangan maksimal 3 hari sebelum batas waktu berakhir.",
-            },
-          ].map((faq, idx) => (
-            <motion.details
-              key={idx}
-              className="bg-[#16213a] rounded-lg p-4 border border-blue-900 shadow hover:bg-blue-900 transition-all duration-300"
-              variants={fadeUp}
-            >
-              <summary className="text-blue-400 font-medium cursor-pointer">
-                {faq.q}
-              </summary>
-              <p className="text-slate-300 mt-3 text-sm">{faq.a}</p>
-            </motion.details>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="px-6 py-16 max-w-4xl mx-auto z-10">
-        <motion.div
-          className="bg-gradient-to-br from-blue-900 via-blue-700 to-blue-800 rounded-2xl px-8 py-12 shadow-xl text-center border border-blue-900"
-          variants={fadeUp}
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-blue-400 mb-4">
-            Siap Memulai Peminjaman?
-          </h2>
-          <p className="text-slate-300 text-lg mb-8">
-            Bergabunglah dengan siswa lain yang sudah merasakan kemudahan sistem
-            digital ini!
-          </p>
-          <button
-            onClick={() => onNavigate("peminjaman")}
-            className="bg-blue-600 text-white font-bold px-10 py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300"
-          >
-            Mulai Sekarang
-          </button>
-        </motion.div>
-      </section>
-
-      {/* Floating Action Button */}
       <motion.div
-        className="fixed bottom-8 right-8 z-20"
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1.5, duration: 0.5 }}
+        className="relative z-10"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
-        <button
-          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-xl border border-blue-500"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 10l7-7m0 0l7 7m-7-7v18"
-            />
-          </svg>
-        </button>
+        {/* Hero Section - JANGAN DIHAPUS */}
+        <section className="min-h-[70vh] px-6 lg:px-12 py-20 flex items-center justify-center">
+          <div className="max-w-7xl mx-auto w-full">
+            <div className="grid lg:grid-cols-2 gap-4 items-center">
+              {/* Left - Logo */}
+              <motion.div
+                className="flex justify-center lg:justify-start"
+                variants={itemVariants}
+              >
+                <div className="relative">
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-2xl opacity-30"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                  <img
+                    src={logoStemba}
+                    alt="SMKN 7 Semarang"
+                    className="w-80 h-80 object-contain relative z-10 drop-shadow-2xl"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Right - Content - JANGAN DIHAPUS */}
+              <motion.div variants={itemVariants} className="space-y-6">
+                <div>
+                  <motion.p
+                    className="text-blue-400 font-semibold text-lg mb-2"
+                    variants={itemVariants}
+                  >
+                    SMKN 7 SEMARANG
+                  </motion.p>
+                  <motion.h1
+                    className="text-4xl lg:text-5xl font-bold text-white mb-3"
+                    variants={itemVariants}
+                  >
+                    Sistem Peminjaman
+                    <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent block">
+                      Alat Praktik
+                    </span>
+                  </motion.h1>
+                </div>
+
+                <motion.p
+                  className="text-gray-300 text-lg leading-relaxed"
+                  variants={itemVariants}
+                >
+                  Platform digital modern untuk memudahkan proses peminjaman
+                  alat praktik. Terintegrasi langsung dengan database sekolah,
+                  cepat dan aman.
+                </motion.p>
+
+                {/* Buttons - JANGAN DIHAPUS */}
+                <motion.div
+                  className="flex flex-wrap gap-4 pt-4"
+                  variants={itemVariants}
+                >
+                  <motion.button
+                    onClick={() => navigate("/form-peminjaman")}
+                    className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 flex items-center gap-2 group"
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Mulai Pinjam
+                    <ArrowRight
+                      size={18}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  </motion.button>
+
+                  <motion.button
+                    onClick={() => navigate("/riwayat")}
+                    className="px-8 py-3 border-2 border-blue-400 text-blue-400 font-semibold rounded-lg hover:bg-blue-400 hover:text-white hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300"
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Lihat Riwayat
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="px-6 lg:px-12 py-16">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+              variants={containerVariants}
+            >
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-gradient-to-br from-[#1e3a8a]/40 to-[#0f3460]/40 border border-blue-500/20 rounded-xl p-6 backdrop-blur-sm hover:border-blue-400/50 transition-all duration-300"
+                  variants={itemVariants}
+                  whileHover={{ y: -5 }}
+                >
+                  <motion.p
+                    className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"
+                    variants={itemVariants}
+                  >
+                    {stat.number}
+                  </motion.p>
+                  <p className="text-gray-400 text-sm lg:text-base mt-2">
+                    {stat.label}
+                  </p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="px-6 lg:px-12 py-20">
+          <div className="max-w-7xl mx-auto">
+            <motion.div className="text-center mb-16" variants={itemVariants}>
+              <h2 className="text-4xl font-bold text-white mb-4">
+                Mengapa Memilih Sistem Kami?
+              </h2>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                Solusi terpadu dengan fitur-fitur lengkap untuk manajemen
+                peminjaman alat praktik yang profesional dan efisien
+              </p>
+            </motion.div>
+
+            <motion.div
+              className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+              variants={containerVariants}
+            >
+              {features.map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <motion.div
+                    key={index}
+                    className="group relative bg-gradient-to-br from-[#1e3a8a]/40 to-[#0f3460]/40 border border-blue-500/20 rounded-xl p-6 hover:border-blue-400/50 transition-all duration-300 overflow-hidden"
+                    variants={itemVariants}
+                    whileHover={{ y: -8 }}
+                  >
+                    {/* Gradient background on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 to-purple-600/0 group-hover:from-blue-600/10 group-hover:to-purple-600/10 transition-all duration-300" />
+
+                    <motion.div
+                      className="relative z-10"
+                      variants={containerVariants}
+                    >
+                      <motion.div
+                        className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4 group-hover:shadow-lg group-hover:shadow-blue-500/50 transition-all"
+                        whileHover={{ rotate: 10, scale: 1.1 }}
+                      >
+                        <Icon size={24} className="text-white" />
+                      </motion.div>
+
+                      <h3 className="text-xl font-bold text-white mb-2">
+                        {feature.title}
+                      </h3>
+                      <p className="text-gray-400 text-sm leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="px-6 lg:px-12 py-20">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-2xl p-12 text-center backdrop-blur-sm"
+              variants={itemVariants}
+              whileHover={{ borderColor: "#3b82f6" }}
+            >
+              <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+                Siap Memulai?
+              </h2>
+              <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+                Bergabunglah dengan sistem manajemen peminjaman alat praktik
+                yang paling modern dan terpercaya di SMKN 7 Semarang
+              </p>
+
+              <motion.button
+                onClick={() => navigate("/form-peminjaman")}
+                className="px-10 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-lg hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300 inline-flex items-center gap-2 group text-lg"
+                whileHover={{ scale: 1.05, y: -3 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Mulai Sekarang
+                <ArrowRight
+                  size={20}
+                  className="group-hover:translate-x-2 transition-transform"
+                />
+              </motion.button>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Footer Info */}
+        <section className="px-6 lg:px-12 py-12 border-t border-blue-500/10 text-center">
+          <motion.p className="text-gray-500 text-sm" variants={itemVariants}>
+            © 2024 SMKN 7 Semarang. Sistem Peminjaman Alat Praktik. Semua hak
+            dilindungi.
+          </motion.p>
+        </section>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

@@ -12,7 +12,9 @@ const Navbar = () => {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
-        const hamburgerButton = document.querySelector("[aria-label='Toggle menu']");
+        const hamburgerButton = document.querySelector(
+          "[aria-label='Toggle menu']"
+        );
         if (hamburgerButton && hamburgerButton.contains(e.target)) {
           return;
         }
@@ -22,7 +24,8 @@ const Navbar = () => {
 
     if (menuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [menuOpen]);
 
@@ -70,7 +73,7 @@ const Navbar = () => {
     <>
       {/* Premium Navbar */}
       <motion.nav
-        className="bg-gradient-to-r from-[#051e3e] via-[#0a2851] to-[#051e3e] border-b-2 border-blue-500/60 backdrop-blur-xl sticky top-0 z-40 shadow-2xl"
+        className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0a183d] to-[#1e293b] border-b border-blue-900/50 backdrop-blur-md"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
@@ -78,7 +81,10 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             {/* Logo Section */}
-            <Link to="/" className="flex items-center gap-3 group focus:outline-none">
+            <Link
+              to="/"
+              className="flex items-center gap-3 group focus:outline-none"
+            >
               {/* Logo Badge */}
               <motion.div
                 className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-blue-500/40"

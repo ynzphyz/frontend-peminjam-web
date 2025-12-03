@@ -16,22 +16,21 @@ export default function Layout({ children }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0a183d]">
-      {/* Navbar */}
+      {/* Navbar dengan z-40 */}
       <Navbar
         onMenuClick={handleMenuClick}
         menuOpen={sidebarOpen}
         closeMenu={handleCloseMenu}
       />
 
-      <div className="flex flex-1">
-        {/* Sidebar */}
+      <div className="flex flex-1 pt-16">
+        {/* Sidebar dengan z-40 */}
         <Sidebar isOpen={sidebarOpen} onClose={handleCloseMenu} />
 
-        {/* Main Content */}
+        {/* Main content - jangan punya z-index tinggi */}
         <main className="flex-1 overflow-auto w-full relative">{children}</main>
       </div>
 
-      {/* Footer */}
       <Footer />
     </div>
   );
