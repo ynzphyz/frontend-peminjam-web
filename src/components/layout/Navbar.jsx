@@ -73,7 +73,7 @@ const Navbar = () => {
     <>
       {/* Premium Navbar */}
       <motion.nav
-        className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0a183d] to-[#1e293b] border-b border-blue-900/50 backdrop-blur-md"
+        className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0a183d] via-[#0f1b35] to-[#1a2a4a] border-b border-blue-900/30 backdrop-blur-xl"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
@@ -85,19 +85,20 @@ const Navbar = () => {
               to="/"
               className="flex items-center gap-3 group focus:outline-none"
             >
-              {/* Logo Badge */}
               <motion.div
-                className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-blue-500/40"
-                whileHover={{ scale: 1.08 }}
+                className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-blue-500/40"
+                whileHover={{
+                  scale: 1.08,
+                  boxShadow: "0 0 30px rgba(59, 130, 246, 0.6)",
+                }}
                 whileTap={{ scale: 0.95 }}
               >
                 S7
               </motion.div>
 
-              {/* Brand Text */}
               <div className="hidden sm:flex flex-col">
                 <motion.h1
-                  className="text-base font-bold text-blue-300 leading-none"
+                  className="text-base font-bold bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent leading-none"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
@@ -122,22 +123,21 @@ const Navbar = () => {
                   key={link.path}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1, duration: 0.4 }}
+                  transition={{ delay: idx * 0.08, duration: 0.4 }}
                 >
                   <Link
                     to={link.path}
-                    className={`relative px-4 py-2 rounded-lg font-semibold text-base transition-all duration-300 ${
+                    className={`relative px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${
                       isActive(link.path)
-                        ? "text-blue-200 bg-blue-600/50"
-                        : "text-gray-200 hover:text-blue-300"
+                        ? "text-blue-200 bg-gradient-to-r from-blue-600/50 to-cyan-600/30"
+                        : "text-gray-300 hover:text-blue-300"
                     }`}
                   >
                     {link.label}
 
-                    {/* Active Indicator */}
                     {isActive(link.path) && (
                       <motion.div
-                        className="absolute -bottom-1 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
+                        className="absolute -bottom-1 left-4 right-4 h-1 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
                         layoutId="navbar-indicator"
                       />
                     )}
@@ -158,7 +158,7 @@ const Navbar = () => {
             >
               <div className="w-6 h-5 flex flex-col justify-between">
                 <motion.span
-                  className="w-full h-0.5 bg-blue-400 rounded-full"
+                  className="w-full h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
                   animate={{
                     rotate: menuOpen ? 45 : 0,
                     y: menuOpen ? 8 : 0,
@@ -166,12 +166,12 @@ const Navbar = () => {
                   transition={{ duration: 0.3 }}
                 />
                 <motion.span
-                  className="w-full h-0.5 bg-blue-400 rounded-full"
+                  className="w-full h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
                   animate={{ opacity: menuOpen ? 0 : 1 }}
                   transition={{ duration: 0.3 }}
                 />
                 <motion.span
-                  className="w-full h-0.5 bg-blue-400 rounded-full"
+                  className="w-full h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
                   animate={{
                     rotate: menuOpen ? -45 : 0,
                     y: menuOpen ? -8 : 0,
@@ -188,7 +188,7 @@ const Navbar = () => {
           {menuOpen && (
             <motion.div
               ref={menuRef}
-              className="md:hidden bg-[#0a2851]/80 backdrop-blur-lg border-t border-blue-500/30"
+              className="md:hidden bg-gradient-to-b from-[#0a2851]/90 to-[#051530]/90 backdrop-blur-lg border-t border-blue-500/30"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -206,9 +206,9 @@ const Navbar = () => {
                     <Link
                       to={link.path}
                       onClick={handleLinkClick}
-                      className={`block px-4 py-3 rounded-lg font-semibold text-base transition-all ${
+                      className={`block px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
                         isActive(link.path)
-                          ? "text-blue-300 bg-blue-600/30 border border-blue-500/50"
+                          ? "text-blue-300 bg-gradient-to-r from-blue-600/30 to-cyan-600/20 border border-blue-500/50"
                           : "text-gray-300 hover:text-blue-300 hover:bg-blue-600/20"
                       }`}
                     >
@@ -226,7 +226,7 @@ const Navbar = () => {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+            className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm"
             onClick={closeMenu}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

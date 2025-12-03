@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { motion as Motion } from "framer-motion";
+// eslint-disable-next-line no-unused-vars
+import { motion } from "framer-motion";
 import ConfirmationModal from "../ui/ConfirmationModal";
 
 export default function Approval() {
@@ -139,130 +140,173 @@ export default function Approval() {
   };
 
   return (
-    <Motion.div
-      className="min-h-screen relative overflow-x-hidden text-white bg-gradient-to-br from-[#0a183d] via-[#101a2b] to-[#1e293b]"
+    <motion.div
+      className="min-h-screen relative overflow-x-hidden text-white bg-gradient-to-br from-[#0a183d] via-[#101a2b] to-[#1e293b] pt-20"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Animated Blobs */}
-      <Motion.div
-        className="absolute top-0 left-0 w-[400px] h-[400px] bg-blue-900 opacity-30 rounded-full blur-3xl z-0"
-        animate={{ scale: [1, 1.2, 1], x: [0, 40, 0], y: [0, 20, 0] }}
-        transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-      />
-      <Motion.div
-        className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-purple-900 opacity-30 rounded-full blur-3xl z-0"
-        animate={{ scale: [1, 1.1, 1], x: [0, -30, 0], y: [0, -20, 0] }}
-        transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
-      />
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <motion.div
+          className="absolute top-20 left-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-screen filter blur-3xl opacity-15"
+          animate={{ y: [0, 100, 0], x: [0, 50, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-screen filter blur-3xl opacity-15"
+          animate={{ y: [0, -100, 0], x: [0, -50, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
 
-      <div className="flex items-center justify-center min-h-[80vh] relative z-10 px-2 sm:px-4 md:px-6 py-12">
-        <Motion.div
-          className="relative bg-[#16213a]/80 backdrop-blur-xl border border-blue-900 rounded-2xl shadow-2xl p-10 max-w-3xl w-full mx-auto"
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-12">
+        <motion.div
+          className="relative bg-gradient-to-br from-[#16213a]/80 to-[#0f3460]/50 backdrop-blur-xl border border-blue-900/30 rounded-2xl shadow-2xl p-8 md:p-12 max-w-2xl w-full"
           variants={cardVariants}
         >
+          {/* Gradient Border */}
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-600/10 to-purple-600/10 pointer-events-none" />
+
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#16213a]/80 z-20 rounded-2xl">
-              <div className="loader"></div>
-              <span className="ml-4 text-blue-400 font-semibold">
-                Mohon tunggu, data sedang diproses...
-              </span>
+            <div className="absolute inset-0 flex items-center justify-center bg-[#16213a]/80 z-20 rounded-2xl backdrop-blur-sm">
+              <div className="flex flex-col items-center gap-4">
+                <motion.div
+                  className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+                <span className="text-blue-300 font-semibold">
+                  Memproses...
+                </span>
+              </div>
             </div>
           )}
 
-          <Motion.h1
-            className="text-3xl md:text-4xl font-extrabold mb-8 text-left text-blue-400"
-            variants={itemVariants}
+          <motion.div
+            className="relative z-10 space-y-8"
+            variants={containerVariants}
           >
-            Formulir Approval Peminjaman Alat SMKN 7 SEMARANG
-          </Motion.h1>
+            <motion.div variants={itemVariants}>
+              <h1 className="text-4xl md:text-5xl font-black mb-2">
+                <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  Formulir Approval
+                </span>
+              </h1>
+              <h2 className="text-xl text-gray-300">
+                Peminjaman Alat SMKN 7 SEMARANG
+              </h2>
+              <div className="h-1 w-20 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full mt-4" />
+            </motion.div>
 
-          <Motion.form onSubmit={handleApprovalSubmit} className="space-y-6" variants={itemVariants}>
-            <div>
-              <label className="block font-semibold mb-2 text-blue-400">
-                ID Pinjam
-              </label>
-              <input
-                type="text"
-                name="idPinjam"
-                value={approvalForm.idPinjam}
-                onChange={handleIdPinjamChange}
-                className="w-full border border-blue-700 bg-[#101a2b] text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition placeholder:text-slate-400"
-                required
-              />
-            </div>
-            <div>
-              <label className="block font-semibold mb-2 text-blue-400">
-                Pilih Approver
-              </label>
-              <div className="flex flex-wrap gap-4">
-                {["Kepala Bengkel", "Penanggung Jawab"].map((role) => (
-                  <label key={role} className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      name="approver"
-                      value={role}
-                      checked={approvalForm.approver === role}
-                      onChange={handleApprovalChange}
-                      className="form-radio accent-blue-600"
-                      required
-                    />
-                    <span className="ml-2">{role}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="block font-semibold mb-2 text-blue-400">
-                Status Persetujuan
-              </label>
-              <div className="flex flex-wrap gap-4">
-                {["disetujui", "dipertimbangkan", "ditolak"].map((status) => (
-                  <label key={status} className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      name="statusPersetujuan"
-                      value={status}
-                      checked={approvalForm.statusPersetujuan === status}
-                      onChange={handleApprovalChange}
-                      className="form-radio accent-blue-600"
-                      required
-                    />
-                    <span className="ml-2 capitalize">{status}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <Motion.button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold text-lg shadow-lg hover:bg-blue-700 transition"
-              disabled={loading}
-              variants={itemVariants}
+            <motion.form
+              onSubmit={handleApprovalSubmit}
+              className="space-y-6"
+              variants={containerVariants}
             >
-              Kirim Approval
-            </Motion.button>
-          </Motion.form>
+              {/* ID Pinjam */}
+              <motion.div variants={itemVariants}>
+                <label className="block font-semibold mb-3 text-blue-300">
+                  ID Pinjam
+                </label>
+                <input
+                  type="text"
+                  name="idPinjam"
+                  value={approvalForm.idPinjam}
+                  onChange={handleIdPinjamChange}
+                  className="w-full bg-[#0f3460]/50 border border-blue-700/50 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition placeholder:text-slate-500"
+                  placeholder="Masukkan ID peminjaman"
+                  required
+                />
+              </motion.div>
 
-          <style jsx>{`
-            .loader {
-              border: 8px solid #f3f3f3;
-              border-top: 8px solid #3498db;
-              border-radius: 50%;
-              width: 50px;
-              height: 50px;
-              animation: spin 1s linear infinite;
-            }
-            @keyframes spin {
-              0% {
-                transform: rotate(0deg);
-              }
-              100% {
-                transform: rotate(360deg);
-              }
-            }
-          `}</style>
-        </Motion.div>
+              {/* Approver Selection */}
+              <motion.div variants={itemVariants}>
+                <label className="block font-semibold mb-3 text-blue-300">
+                  Pilih Approver
+                </label>
+                <div className="space-y-2">
+                  {["Kepala Bengkel", "Penanggung Jawab"].map((role) => (
+                    <label
+                      key={role}
+                      className="flex items-center gap-3 p-3 rounded-lg border border-blue-700/30 hover:border-blue-500/50 cursor-pointer transition hover:bg-blue-900/20"
+                    >
+                      <input
+                        type="radio"
+                        name="approver"
+                        value={role}
+                        checked={approvalForm.approver === role}
+                        onChange={handleApprovalChange}
+                        className="w-4 h-4 accent-blue-500"
+                        required
+                      />
+                      <span className="font-medium">{role}</span>
+                    </label>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Status Persetujuan */}
+              <motion.div variants={itemVariants}>
+                <label className="block font-semibold mb-3 text-blue-300">
+                  Status Persetujuan
+                </label>
+                <div className="space-y-2">
+                  {[
+                    {
+                      value: "disetujui",
+                      label: "✓ Disetujui",
+                      color:
+                        "border-green-500/30 hover:border-green-500/50 hover:bg-green-900/20",
+                    },
+                    {
+                      value: "dipertimbangkan",
+                      label: "⏳ Dipertimbangkan",
+                      color:
+                        "border-yellow-500/30 hover:border-yellow-500/50 hover:bg-yellow-900/20",
+                    },
+                    {
+                      value: "ditolak",
+                      label: "✗ Ditolak",
+                      color:
+                        "border-red-500/30 hover:border-red-500/50 hover:bg-red-900/20",
+                    },
+                  ].map((status) => (
+                    <label
+                      key={status.value}
+                      className={`flex items-center gap-3 p-3 rounded-lg border ${status.color} cursor-pointer transition`}
+                    >
+                      <input
+                        type="radio"
+                        name="statusPersetujuan"
+                        value={status.value}
+                        checked={
+                          approvalForm.statusPersetujuan === status.value
+                        }
+                        onChange={handleApprovalChange}
+                        className="w-4 h-4 accent-blue-500"
+                        required
+                      />
+                      <span className="font-medium">{status.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Submit Button */}
+              <motion.button
+                type="submit"
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading}
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                variants={itemVariants}
+              >
+                Kirim Approval
+              </motion.button>
+            </motion.form>
+          </motion.div>
+        </motion.div>
       </div>
 
       <ConfirmationModal
@@ -273,6 +317,6 @@ export default function Approval() {
         title="Approval Peminjaman"
         type="approval"
       />
-    </Motion.div>
+    </motion.div>
   );
 }
