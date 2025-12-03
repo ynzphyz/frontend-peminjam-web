@@ -213,9 +213,89 @@
   }
 }
 
-/* Pastikan toastify selalu di atas */
-.Toastify__toast-container {
+/* Toast Container - Pastikan di atas semua */
+.toast-container {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
   z-index: 9999 !important;
+  width: auto !important;
+  max-width: 500px !important;
+  padding: 0 !important;
+}
+
+/* Toast Item */
+.toast-custom {
+  background-color: #16213a !important;
+  border: 1px solid #0f3460 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+  padding: 16px 20px !important;
+  margin-bottom: 12px !important;
+  min-width: 350px !important;
+  z-index: 9999 !important;
+}
+
+/* Toast Body */
+.toast-body-custom {
+  color: #fff !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif !important;
+}
+
+/* Toast Success */
+.Toastify__toast--success {
+  background-color: #10b981 !important;
+}
+
+.Toastify__toast--success .Toastify__toast-icon {
+  color: #fff !important;
+}
+
+/* Toast Error */
+.Toastify__toast--error {
+  background-color: #ef4444 !important;
+}
+
+.Toastify__toast--error .Toastify__toast-icon {
+  color: #fff !important;
+}
+
+/* Toast Warning */
+.Toastify__toast--warning {
+  background-color: #f59e0b !important;
+}
+
+/* Toast Info */
+.Toastify__toast--info {
+  background-color: #3b82f6 !important;
+}
+
+/* Close Button */
+.Toastify__close-button {
+  color: #fff !important;
+  opacity: 0.7 !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+}
+
+/* Progress Bar */
+.Toastify__progress-bar {
+  background: linear-gradient(to right, #3b82f6, #1d4ed8) !important;
+  height: 3px !important;
+}
+
+/* Pastikan ToastContainer z-index tinggi */
+.Toastify__toast-container {
+  position: fixed !important;
+  z-index: 9999 !important;
+  top: 20px !important;
+  right: 20px !important;
 }
 
 .Toastify__toast {

@@ -67,19 +67,22 @@ function App() {
         </Layout>
       </Router>
 
-      {/* ToastContainer HARUS di luar Router dan Layout */}
+      {/* ToastContainer dengan styling yang benar */}
       <ToastContainer
-        position="bottom-right"
+        position="top-right"
         autoClose={3000}
         hideProgressBar={false}
-        newestOnTop={false}
+        newestOnTop={true}
         closeOnClick
         rtl={false}
         pauseOnFocusLoss
         draggable
         pauseOnHover
         theme="dark"
-        style={{ zIndex: 9999 }}
+        limit={1}
+        className="toast-container"
+        toastClassName="toast-custom"
+        bodyClassName="toast-body-custom"
       />
     </>
   );
