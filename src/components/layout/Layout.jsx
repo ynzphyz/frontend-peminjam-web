@@ -28,7 +28,7 @@ export default function Layout({ children }) {
         <Sidebar isOpen={sidebarOpen} onClose={handleCloseMenu} />
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto w-full">{children}</main>
+        <main className="flex-1 overflow-auto w-full relative">{children}</main>
       </div>
 
       {/* Footer */}

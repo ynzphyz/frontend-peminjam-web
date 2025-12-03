@@ -17,54 +17,57 @@ import Riwayat from "./components/pages/Riwayat";
 
 function App() {
   return (
-    <Router>
-      <Layout>
-        <AnimatePresence mode="wait">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <PageTransition>
-                  <HomePage />
-                </PageTransition>
-              }
-            />
-            <Route
-              path="/form-peminjaman"
-              element={
-                <PageTransition>
-                  <Peminjaman />
-                </PageTransition>
-              }
-            />
-            <Route
-              path="/form-approval"
-              element={
-                <PageTransition>
-                  <Approval />
-                </PageTransition>
-              }
-            />
-            <Route
-              path="/form-pengembalian"
-              element={
-                <PageTransition>
-                  <Pengembalian />
-                </PageTransition>
-              }
-            />
-            <Route
-              path="/riwayat"
-              element={
-                <PageTransition>
-                  <Riwayat />
-                </PageTransition>
-              }
-            />
-          </Routes>
-        </AnimatePresence>
-      </Layout>
+    <>
+      <Router>
+        <Layout>
+          <AnimatePresence mode="wait">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <PageTransition>
+                    <HomePage />
+                  </PageTransition>
+                }
+              />
+              <Route
+                path="/form-peminjaman"
+                element={
+                  <PageTransition>
+                    <Peminjaman />
+                  </PageTransition>
+                }
+              />
+              <Route
+                path="/form-approval"
+                element={
+                  <PageTransition>
+                    <Approval />
+                  </PageTransition>
+                }
+              />
+              <Route
+                path="/form-pengembalian"
+                element={
+                  <PageTransition>
+                    <Pengembalian />
+                  </PageTransition>
+                }
+              />
+              <Route
+                path="/riwayat"
+                element={
+                  <PageTransition>
+                    <Riwayat />
+                  </PageTransition>
+                }
+              />
+            </Routes>
+          </AnimatePresence>
+        </Layout>
+      </Router>
 
+      {/* ToastContainer HARUS di luar Router dan Layout */}
       <ToastContainer
         position="bottom-right"
         autoClose={3000}
@@ -75,8 +78,10 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
+        theme="dark"
+        style={{ zIndex: 9999 }}
       />
-    </Router>
+    </>
   );
 }
 
