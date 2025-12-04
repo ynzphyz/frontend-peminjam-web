@@ -1,164 +1,122 @@
-# FRONTEND-PEMINJAM-WEB
+<h1 align="center">Frontend Peminjam Web</h1>
 
-Frontend web application for handling submission and display of loan/borrowing requests.  
-This project serves as the user-facing interface for a borrowing management system and is developed using modern frontend technologies.
+<p align="center">
+  A modern frontend web app for managing and submitting loan requests.  
+  Built with performance, simplicity, and scalability in mind.
+</p>
 
-![Last Commit](https://img.shields.io/github/last-commit/ynzphyz/frontend-peminjam-web)
-![Language](https://img.shields.io/github/languages/top/ynzphyz/frontend-peminjam-web)
-![Repo Size](https://img.shields.io/github/repo-size/ynzphyz/frontend-peminjam-web)
-
----
-
-## 📌 Overview
-
-`frontend-peminjam-web` is the frontend layer of a borrowing system application.  
-It focuses on building a responsive and clean UI to allow users to:
-
-- Submit borrowing data
-- Interact with backend APIs
-- Display submission results
-- Prepare the foundation for future expansion (approval system, history, etc.)
-
-This project is part of a full-stack system and is designed to be connected to a backend service.
+<p align="center">
+  <img src="https://img.shields.io/github/last-commit/ynzphyz/frontend-peminjam-web" />
+  <img src="https://img.shields.io/github/languages/top/ynzphyz/frontend-peminjam-web" />
+  <img src="https://img.shields.io/github/repo-size/ynzphyz/frontend-peminjam-web" />
+</p>
 
 ---
 
-## 🚀 Features
+## Overview
 
-- Modern UI with React
-- Component-based architecture
-- HTTP request handling with Axios
-- Fast development using Vite
-- Clean styling with Tailwind CSS
-- Ready to integrate with backend API
-- Scalable structure for future development
+**Frontend Peminjam Web** is the user interface layer of a loan / borrowing system.  
+Its purpose is to provide a clean, fast, and maintainable interface for users to submit requests and interact with backend services.
+
+This frontend was built with scalability and future expansion in mind and can be extended into a complete management dashboard system.
 
 ---
 
-## 🛠️ Tech Stack
+## Key Features
 
-Main technologies used in this project:
-
-- React
-- JavaScript
-- Vite
-- Axios
-- Tailwind CSS
-- ESLint
-- PostCSS
+- Modern React architecture
+- Clean and responsive UI using Tailwind CSS
+- API communication via Axios
+- Fast development environment powered by Vite
+- Code quality enforcement with ESLint
+- Ready for backend integration
+- Designed for future scalability
 
 ---
 
-## 📂 Project Structure
+## Technology Stack
 
-```
+| Category | Tools |
+|----------|------|
+| Framework | React |
+| Build Tool | Vite |
+| HTTP Client | Axios |
+| Styling | Tailwind CSS |
+| Linter | ESLint |
+| Language | JavaScript |
 
-frontend-peminjam-web/
+---
+
+## Project Structure
+
+frontend-peminjam-web
 │
-├── public/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── pages/
-│   ├── App.jsx
-│   └── main.jsx
+├── public
+├── src
+│ ├── assets
+│ ├── components
+│ ├── pages
+│ ├── App.jsx
+│ └── main.jsx
 │
 ├── index.html
 ├── package.json
-├── postcss.config.js
 ├── tailwind.config.js
+├── postcss.config.js
 └── vite.config.js
 
-````
+yaml
+Copy code
 
 ---
 
-## ⚙️ Installation & Running the Project
+## Getting Started
 
-Clone repository:
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/ynzphyz/frontend-peminjam-web.git
 cd frontend-peminjam-web
-````
-
-Install dependencies:
-
-```bash
+2. Install Dependencies
+bash
+Copy code
 npm install
-```
-
-Run development server:
-
-```bash
+3. Run Development Server
+bash
+Copy code
 npm run dev
-```
-
-Build for production:
-
-```bash
+4. Build for Production
+bash
+Copy code
 npm run build
-```
+API Configuration
+This project communicates with a backend system via API.
+Ensure your API endpoint is set correctly in Axios configuration.
 
----
-
-## 🔗 API Configuration
-
-This frontend is designed to communicate with a backend API.
-Make sure your API endpoint is correctly configured inside Axios configuration files or environment variables.
-
-Example:
-
-```js
+js
+Copy code
 axios.create({
   baseURL: "http://localhost:8080"
 });
-```
+Project Intent
+This project is designed as the frontend foundation for a larger ecosystem which can evolve into:
 
----
+Approval system
 
-## 🎯 Project Goal
+User roles and access control
 
-To build a clean and maintainable frontend system for managing borrowing workflows that can later evolve into:
+History and tracking
 
-* Approval system
-* Return tracking
-* Borrowing history
-* Role-based access
+Automation workflows
 
----
+Reporting dashboard
 
-## 📌 Status
+Development Status
+Active Development
 
-**Active Development**
-Project is currently under development and open for further improvements.
+This project is actively being improved and prepared for production-level usage.
 
----
-
-## 👨‍💻 Author
-
-Developed by:
-**Sebastian Alexander Eka Cahyana**
-GitHub: [https://github.com/ynzphyz](https://github.com/ynzphyz)
-
----
-
-## 📄 License
-
-This project is open source and available for learning and development purposes.
-
-```
-
----
-
-Jika kamu ingin:
-
-- README lewat “tampilan AI seperti Gitdocify”
-- Versi Bahasa Indonesia
-- Tambah screenshot
-- Dokumentasi API backend
-- Environment setup
-- README tingkat “portfolio profesional”
-
-Katakan saja. Saya upgrade langsung.
-```
+Author
+Developed by
+Sebastian Alexander Eka Cahyana
+GitHub: https://github.com/ynzphyz
