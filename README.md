@@ -1,122 +1,118 @@
-<h1 align="center">Frontend Peminjam Web</h1>
+<div align="center">
 
-<p align="center">
-  A modern frontend web app for managing and submitting loan requests.  
-  Built with performance, simplicity, and scalability in mind.
-</p>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original.svg" width="90"/>
 
-<p align="center">
-  <img src="https://img.shields.io/github/last-commit/ynzphyz/frontend-peminjam-web" />
-  <img src="https://img.shields.io/github/languages/top/ynzphyz/frontend-peminjam-web" />
-  <img src="https://img.shields.io/github/repo-size/ynzphyz/frontend-peminjam-web" />
-</p>
+  <h1>Frontend Peminjaman Web</h1>
+  <p>Antarmuka web modern untuk sistem peminjaman alat berbasis React & Tailwind</p>
 
----
+  <p>
+    <img src="https://img.shields.io/github/stars/ynzphyz/frontend-peminjam-web?style=flat-square" />
+    <img src="https://img.shields.io/github/forks/ynzphyz/frontend-peminjam-web?style=flat-square" />
+    <img src="https://img.shields.io/github/issues/ynzphyz/frontend-peminjam-web?style=flat-square" />
+    <img src="https://img.shields.io/github/license/ynzphyz/frontend-peminjam-web?style=flat-square" />
+  </p>
 
-## Overview
-
-**Frontend Peminjam Web** is the user interface layer of a loan / borrowing system.  
-Its purpose is to provide a clean, fast, and maintainable interface for users to submit requests and interact with backend services.
-
-This frontend was built with scalability and future expansion in mind and can be extended into a complete management dashboard system.
+</div>
 
 ---
 
-## Key Features
+## 📄 Deskripsi
 
-- Modern React architecture
-- Clean and responsive UI using Tailwind CSS
-- API communication via Axios
-- Fast development environment powered by Vite
-- Code quality enforcement with ESLint
-- Ready for backend integration
-- Designed for future scalability
+**Frontend Peminjaman Web** adalah aplikasi antarmuka berbasis web untuk sistem peminjaman alat / barang yang dibuat menggunakan React dan Tailwind CSS.  
+Proyek ini berfokus pada desain yang rapi, modern, responsif, dan siap diintegrasikan ke backend.
 
----
-
-## Technology Stack
-
-| Category | Tools |
-|----------|------|
-| Framework | React |
-| Build Tool | Vite |
-| HTTP Client | Axios |
-| Styling | Tailwind CSS |
-| Linter | ESLint |
-| Language | JavaScript |
+Cocok digunakan untuk:
+- Sistem peminjaman sekolah
+- Form peminjaman internal perusahaan
+- Prototype aplikasi inventaris
+- Latihan frontend development berbasis React
 
 ---
 
-## Project Structure
+## ⚙️ Teknologi yang Digunakan
 
-frontend-peminjam-web
-│
-├── public
-├── src
-│ ├── assets
-│ ├── components
-│ ├── pages
-│ ├── App.jsx
-│ └── main.jsx
-│
-├── index.html
-├── package.json
-├── tailwind.config.js
-├── postcss.config.js
-└── vite.config.js
-
-yaml
-Copy code
+| Teknologi | Keterangan |
+|-----------|-----------|
+| React     | Library UI utama |
+| Vite      | Build tool cepat |
+| Tailwind  | Styling utility-first |
+| JavaScript| Logic aplikasi |
+| HTML/CSS  | Struktur UI |
 
 ---
 
-## Getting Started
+## 🚀 Instalasi & Menjalankan Proyek
 
-### 1. Clone Repository
+Pastikan Node.js sudah terinstal.
 
 ```bash
+# Clone repository
 git clone https://github.com/ynzphyz/frontend-peminjam-web.git
+
+# Masuk folder
 cd frontend-peminjam-web
-2. Install Dependencies
-bash
-Copy code
+
+# Install dependency
 npm install
-3. Run Development Server
-bash
-Copy code
+
+# Jalankan development server
 npm run dev
-4. Build for Production
-bash
+Akses hasilnya di browser:
+
+arduino
 Copy code
-npm run build
-API Configuration
-This project communicates with a backend system via API.
-Ensure your API endpoint is set correctly in Axios configuration.
-
-js
+http://localhost:5173
+📁 Struktur Proyek
+text
 Copy code
-axios.create({
-  baseURL: "http://localhost:8080"
-});
-Project Intent
-This project is designed as the frontend foundation for a larger ecosystem which can evolve into:
+frontend-peminjam-web/
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── pages/
+│   └── main.jsx
+├── index.html
+├── package.json
+└── vite.config.js
+✅ Fitur Saat Ini
+UI form peminjaman
 
-Approval system
+Layout responsif
 
-User roles and access control
+Styling Tailwind CSS
 
-History and tracking
+Struktur modular React
 
-Automation workflows
+Siap integrasi API backend
 
-Reporting dashboard
+🧠 Rencana Pengembangan
+✅ Integrasi Backend
 
-Development Status
-Active Development
+⏳ Data validation
 
-This project is actively being improved and prepared for production-level usage.
+⏳ Sistem login
 
-Author
-Developed by
+⏳ Riwayat peminjaman
+
+⏳ Export PDF / laporan
+
+🧑‍💻 Kontributor
+Dikembangkan oleh:
+
 Sebastian Alexander Eka Cahyana
 GitHub: https://github.com/ynzphyz
+
+📜 Lisensi
+Proyek ini menggunakan lisensi MIT — bebas digunakan dan dikembangkan.
+
+⭐ Dukungan
+Jika proyek ini membantu kamu:
+
+Kasih star
+
+Fork
+
+Kembangkan
+
+Itu dukungan terbaik.
