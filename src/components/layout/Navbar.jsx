@@ -1,13 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
+import { LogOut } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const closeTimeoutRef = useRef(null);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+    setMenuOpen(false);
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -59,13 +69,19 @@ const Navbar = () => {
     closeMenu(e);
   };
 
-  const navLinks = [
+  // Role-based links:
+  // - Admin: only Home and Admin Dashboard
+  // - Non-admin: regular app links
+  const baseLinks = [
     { path: "/", label: "Home" },
     { path: "/form-peminjaman", label: "Peminjaman" },
-    { path: "/form-approval", label: "Approval" },
     { path: "/form-pengembalian", label: "Pengembalian" },
-    { path: "/riwayat", label: "Riwayat" },
   ];
+  const adminLinks = [
+    { path: "/", label: "Home" },
+    { path: "/admin", label: "Admin Dashboard" },
+  ];
+  const navLinks = isAdmin ? adminLinks : baseLinks;
 
   const isActive = (path) => location.pathname === path;
 
@@ -146,6 +162,46 @@ const Navbar = () => {
               ))}
             </div>
 
+            {/* Auth Buttons */}
+            <div className="hidden md:flex items-center gap-3">
+              {isAuthenticated ? (
+                <>
+                  <div className="text-sm text-gray-300 px-4 py-2 rounded-lg bg-blue-600/20">
+                    <span className="font-semibold text-blue-200">{user?.name}</span>
+                    <span className="text-gray-400 ml-2">({user?.role})</span>
+                  </div>
+                  <motion.button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold text-sm hover:from-red-700 hover:to-red-800 transition-all"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </motion.button>
+                </>
+              ) : (
+                <>
+                  <motion.button
+                    onClick={() => navigate("/login")}
+                    className="px-4 py-2 rounded-lg text-blue-300 font-semibold text-sm hover:bg-blue-600/20 transition-all"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Login
+                  </motion.button>
+                  <motion.button
+                    onClick={() => navigate("/register")}
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-cyan-700 transition-all"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Register
+                  </motion.button>
+                </>
+              )}
+            </div>
+
             {/* Mobile Hamburger Button */}
             <motion.button
               onClick={toggleMenu}
@@ -216,6 +272,52 @@ const Navbar = () => {
                     </Link>
                   </motion.div>
                 ))}
+
+                {/* Mobile Auth Buttons */}
+                <div className="border-t border-blue-500/30 pt-4 mt-4">
+                  {isAuthenticated ? (
+                    <>
+                      <div className="text-sm text-gray-300 px-4 py-3 rounded-lg bg-blue-600/20 mb-2">
+                        <span className="font-semibold text-blue-200">{user?.name}</span>
+                        <span className="text-gray-400 ml-2">({user?.role})</span>
+                      </div>
+                      <motion.button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold text-sm hover:from-red-700 hover:to-red-800 transition-all"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <LogOut size={16} />
+                        Logout
+                      </motion.button>
+                    </>
+                  ) : (
+                    <>
+                      <motion.button
+                        onClick={() => {
+                          navigate("/login");
+                          handleLinkClick();
+                        }}
+                        className="w-full px-4 py-3 rounded-lg text-blue-300 font-semibold text-sm hover:bg-blue-600/20 transition-all mb-2"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        Login
+                      </motion.button>
+                      <motion.button
+                        onClick={() => {
+                          navigate("/register");
+                          handleLinkClick();
+                        }}
+                        className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-cyan-700 transition-all"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        Register
+                      </motion.button>
+                    </>
+                  )}
+                </div>
               </div>
             </motion.div>
           )}

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 
-export default function Layout({ children }) {
+export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleMenuClick = () => {
@@ -28,7 +29,9 @@ export default function Layout({ children }) {
         <Sidebar isOpen={sidebarOpen} onClose={handleCloseMenu} />
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto w-full">{children}</main>
+        <main className="flex-1 overflow-auto w-full">
+          <Outlet />
+        </main>
       </div>
 
       <Footer />

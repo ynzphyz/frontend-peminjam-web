@@ -69,3 +69,8 @@ export const fetchHistory = async () => {
 export const fetchPeminjamData = async (id) => {
   return apiCall(`/peminjaman/${id}`);
 };
+
+// Admin dashboard stats
+export const fetchStats = async () => {
+  return apiCall("/stats");
+};

@@ -1,0 +1,322 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
+
+const Register = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setError("");
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      setError("Nama lengkap harus diisi");
+      return false;
+    }
+    if (!formData.email.includes("@")) {
+      setError("Email tidak valid");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError("Password minimal 6 karakter");
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Password tidak cocok");
+      return false;
+    }
+    return true;
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      setError("");
+      
+      const token = credentialResponse.credential;
+
+      // Send token ke backend untuk REGISTRASI Google
+      const response = await axios.post(
+        "http://localhost:8080/auth/google-register",
+        { token },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Google register berhasil:", response.data);
+      
+      // Redirect ke login setelah berhasil register via Google
+      navigate("/login");
+    } catch (err) {
+      console.error("Google register error:", err);
+      setError(err.response?.data?.error || "Registrasi dengan Google gagal");
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Gagal melakukan registrasi dengan Google");
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await axios.post(
+        "http://localhost:8080/auth/register",
+        {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Registrasi berhasil:", response.data);
+      
+      // Redirect ke login setelah berhasil
+      navigate("/login");
+    } catch (err) {
+      console.error("Register error:", err);
+      setError(
+        err.response?.data?.error ||
+          "Registrasi gagal. Silakan coba lagi."
+      );
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-md mx-4">
+      {/* Register Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-gradient-to-br from-[#0f2855]/95 to-[#051530]/95 backdrop-blur-xl rounded-2xl border border-blue-500/30 p-8 shadow-2xl shadow-blue-900/50"
+      >
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">
+            Daftar Akun
+          </h1>
+          <p className="text-sm text-gray-400">
+            Bergabung dengan sistem manajemen peminjaman kami
+          </p>
+        </motion.div>
+
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg"
+          >
+            <p className="text-red-300 text-sm font-medium">{error}</p>
+          </motion.div>
+        )}
+
+        {/* Google Register Button */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.15 }}
+          className="mb-6"
+        >
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="signup_with"
+              theme="dark"
+              size="large"
+            />
+          </div>
+        </motion.div>
+
+        {/* Divider */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex items-center gap-3 mb-6"
+        >
+          <div className="flex-1 h-px bg-gradient-to-r from-blue-500/20 to-transparent" />
+          <span className="text-xs text-gray-500 font-semibold">ATAU</span>
+          <div className="flex-1 h-px bg-gradient-to-l from-blue-500/20 to-transparent" />
+        </motion.div>
+
+        {/* Register Form */}
+        <motion.form
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.25 }}
+          onSubmit={handleRegister}
+          className="space-y-3"
+        >
+          {/* Name Input */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+              Nama Lengkap
+            </label>
+            <div className="relative">
+              <User size={16} className="absolute left-3 top-2.5 text-blue-400" />
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Masukkan nama"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {/* Email Input */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+              Email
+            </label>
+            <div className="relative">
+              <Mail size={16} className="absolute left-3 top-2.5 text-blue-400" />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="name@example.com"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {/* Password Input */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+              Password
+            </label>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3 top-2.5 text-blue-400" />
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Minimal 6 karakter"
+                className="w-full pl-9 pr-10 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 text-gray-400 hover:text-blue-400 transition"
+                disabled={loading}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm Password Input */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+              Konfirmasi Password
+            </label>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3 top-2.5 text-blue-400" />
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Ulangi password"
+                className="w-full pl-9 pr-10 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-2.5 text-gray-400 hover:text-blue-400 transition"
+                disabled={loading}
+              >
+                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Register Button */}
+          <motion.button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-lg transition-all flex items-center justify-center gap-2"
+            whileHover={{ scale: loading ? 1 : 1.02 }}
+            whileTap={{ scale: loading ? 1 : 0.98 }}
+          >
+            {loading ? "Mendaftar..." : "Daftar"}
+            {!loading && <ArrowRight size={16} />}
+          </motion.button>
+        </motion.form>
+
+        {/* Login Link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6 text-center text-sm text-gray-400"
+        >
+          Sudah punya akun?{" "}
+          <Link
+            to="/login"
+            className="text-blue-300 hover:text-blue-200 font-semibold transition"
+          >
+            Login di sini
+          </Link>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Register;
