@@ -8,6 +8,10 @@ import { fetchStats } from "../../utils/api";
 const AdminDashboard = () => {
   const { user } = useAuth();
 
+  // Debug logging
+  console.log("🔍 AdminDashboard - Current user:", user);
+  console.log("🔍 AdminDashboard - Is admin?:", user?.role === "admin");
+
   const [stats, setStats] = useState([
     { label: "Total Peminjaman", value: "…", icon: FileText, color: "from-blue-500 to-blue-600" },
     { label: "Total Users", value: "…", icon: Users, color: "from-cyan-500 to-cyan-600" },

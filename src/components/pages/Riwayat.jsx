@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactDOM from "react-dom";
 import { Trash2, RefreshCw, Search, X } from "lucide-react";
+import { fetchHistory, deleteHistory, fetchPeminjamData } from "../../utils/api";
 
 const containerVariants = {
   hidden: {
@@ -79,18 +80,15 @@ export default function Riwayat() {
   const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
-    fetchHistory();
+    loadHistory();
   }, []);
 
-  const fetchHistory = async () => {
+  const loadHistory = async () => {
     setLoading(true);
     try {
       console.log("🔍 Fetching dari: http://localhost:8080/history");
 
-      const response = await fetch("http://localhost:8080/history");
-      if (!response.ok) throw new Error("Gagal mengambil data");
-
-      const data = await response.json();
+      const data = await fetchHistory();
       console.log("✅ Data dari backend:", data);
 
       setHistoryData(data || []);
@@ -111,12 +109,7 @@ export default function Riwayat() {
           id
       );
 
-      const response = await fetch(
-        `http://localhost:8080/get-peminjam-data?id=${id}`
-      );
-      if (!response.ok) throw new Error("Gagal mengambil detail data");
-
-      const data = await response.json();
+      const data = await fetchPeminjamData(id);
       console.log("✅ Detail data:", data);
 
       setDetailData(data);
@@ -165,12 +158,13 @@ export default function Riwayat() {
   const handleDelete = async () => {
     if (!selectedItem) return;
     setIsDeleting(true);
+    console.log(`🗑️ Attempting to delete item:`, selectedItem);
+    console.log(`🗑️ Item ID type: ${typeof selectedItem.id}, value: ${selectedItem.id}`);
+    
     try {
-      const response = await fetch(
-        `http://localhost:8080/delete-history?id=${selectedItem.id}`,
-        { method: "DELETE" }
-      );
-      if (!response.ok) throw new Error("Gagal menghapus");
+      console.log(`🗑️ Calling deleteHistory with id: ${selectedItem.id}`);
+      const result = await deleteHistory(selectedItem.id);
+      console.log(`✅ Delete API call succeeded, result:`, result);
 
       setHistoryData((prev) =>
         prev.filter((item) => item.id !== selectedItem.id)
@@ -179,7 +173,14 @@ export default function Riwayat() {
       setShowDeleteModal(false);
     } catch (error) {
       console.error("❌ Error deleting:", error);
-      toast.error("❌ Gagal menghapus data");
+      console.error(`❌ Error type: ${error.name}`);
+      console.error(`❌ Error message: ${error.message}`);
+      console.error(`❌ Error details:`, error);
+      if (error.response) {
+        console.error(`❌ Response status: ${error.response.status}`);
+        console.error(`❌ Response data:`, error.response.data);
+      }
+      toast.error(`❌ Gagal menghapus data: ${error.message}`);
     } finally {
       setIsDeleting(false);
       setSelectedItem(null);
@@ -277,7 +278,7 @@ export default function Riwayat() {
           {/* Refresh Button */}
           <motion.div className="md:col-span-3 w-full" variants={itemVariants}>
             <motion.button
-              onClick={fetchHistory}
+              onClick={loadHistory}
               disabled={loading}
               className="w-full px-4 md:px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/50 whitespace-nowrap"
               whileHover={{ scale: 1.05 }}

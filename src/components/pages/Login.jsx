@@ -34,11 +34,12 @@ const Login = () => {
       );
 
       console.log("Backend response:", response);
-      const { email, name, role } = response.data || {};
-      console.log("Parsed user:", { email, name, role });
+      const { user, token } = response.data || {};
+      const { email, name, role } = user || {};
+      console.log("Parsed user:", { email, name, role, token });
 
-      // Save user to context (no token stored)
-      login({ email, name, role });
+      // Save user to context with token
+      login({ email, name, role, token });
 
       // Redirect based on role
       if (role === "admin") {
@@ -73,8 +74,9 @@ const Login = () => {
         { headers: { "Content-Type": "application/json" } }
       );
 
-      const { email: eResp, name, role } = response.data || {};
-      login({ email: eResp, name, role });
+      const { user, token } = response.data || {};
+      const { email: eResp, name, role } = user || {};
+      login({ email: eResp, name, role, token });
 
       if (role === "admin") {
         navigate("/admin");
