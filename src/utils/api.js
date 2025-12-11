@@ -154,9 +154,11 @@ export const fetchPeminjamData = async (id) => {
 };
 
 // Note: Delete functionality not implemented in backend yet
-export const deleteHistory = async () => {
-  console.warn('⚠️ Delete endpoint not implemented in backend');
-  throw new Error('Delete functionality not available');
+export const deleteHistory = async (id) => {
+  console.log(`🗑️ DELETE /peminjaman/${id}`);
+  return apiCall(`/peminjaman/${id}`, {
+    method: "DELETE",
+  });
 };
 
 // Note: Stats endpoint not implemented in backend yet

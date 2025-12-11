@@ -802,19 +802,19 @@ export default function Riwayat() {
                       <div className="flex justify-between items-start">
                         <span className="text-sm text-gray-400">Nama:</span>
                         <span className="text-sm font-semibold text-white">
-                          {selectedItem.name}
+                          {selectedItem.nama || "-"}
                         </span>
                       </div>
                       <div className="flex justify-between items-start">
                         <span className="text-sm text-gray-400">Alat:</span>
                         <span className="text-sm font-semibold text-white">
-                          {selectedItem.namaAlat || "-"}
+                          {selectedItem.nama_alat || "-"}
                         </span>
                       </div>
                       <div className="flex justify-between items-start">
                         <span className="text-sm text-gray-400">Tanggal:</span>
                         <span className="text-sm font-semibold text-white">
-                          {selectedItem.date}
+                          {selectedItem.tanggal || "-"}
                         </span>
                       </div>
                       <div className="flex justify-between items-start">

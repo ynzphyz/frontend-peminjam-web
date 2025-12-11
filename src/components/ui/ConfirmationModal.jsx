@@ -67,7 +67,7 @@ const ConfirmationModal = ({
                   ID Peminjaman
                 </p>
                 <p className="font-bold text-blue-200 text-lg">
-                  {formData?.idPinjam || "-"}
+                  #{formData?.peminjaman_id || "-"}
                 </p>
               </div>
             </motion.div>
@@ -81,11 +81,11 @@ const ConfirmationModal = ({
                 transition={{ delay: 0.15 }}
               >
                 <h4 className="font-semibold text-blue-300 border-b border-blue-700/50 pb-2">
-                  📋 Data Peminjam
+                  📋 Data Peminjaman
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-xs text-gray-400 mb-1">Nama</p>
+                    <p className="text-xs text-gray-400 mb-1">Nama Peminjam</p>
                     <p className="font-semibold text-white">
                       {formData.peminjamData.nama || "-"}
                     </p>
@@ -97,15 +97,39 @@ const ConfirmationModal = ({
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 mb-1">Alat</p>
+                    <p className="text-xs text-gray-400 mb-1">NIS</p>
                     <p className="font-semibold text-white">
-                      {formData.peminjamData.namaAlat || "-"}
+                      {formData.peminjamData.nis || "-"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 mb-1">Jumlah</p>
+                    <p className="text-xs text-gray-400 mb-1">No. WhatsApp</p>
                     <p className="font-semibold text-white">
-                      {formData.peminjamData.jumlahAlat || "-"}
+                      {formData.peminjamData.no_wa || "-"}
+                    </p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-xs text-gray-400 mb-1">Nama Alat</p>
+                    <p className="font-semibold text-white">
+                      {formData.peminjamData.nama_alat || "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Jumlah Alat</p>
+                    <p className="font-semibold text-white">
+                      {formData.peminjamData.jumlah_alat || "-"} unit
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Tanggal Pinjam</p>
+                    <p className="font-semibold text-white">
+                      {formData.peminjamData.tanggal_peminjaman || "-"}
+                    </p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-xs text-gray-400 mb-1">Keterangan</p>
+                    <p className="font-semibold text-white">
+                      {formData.peminjamData.keterangan || "-"}
                     </p>
                   </div>
                 </div>
@@ -124,15 +148,22 @@ const ConfirmationModal = ({
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-gray-400 mb-1">Approver</p>
+                  <p className="text-xs text-gray-400 mb-1">Disetujui Oleh</p>
                   <p className="font-semibold text-white">
-                    {formData?.approver || "-"}
+                    {formData?.disetujui_oleh || "-"}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Status</p>
-                  <p className="font-semibold text-cyan-300">
-                    {formData?.statusPersetujuan || "-"}
+                  <p className={`font-semibold ${
+                    formData?.status_persetujuan === 'disetujui' ? 'text-green-400' :
+                    formData?.status_persetujuan === 'ditolak' ? 'text-red-400' :
+                    'text-yellow-400'
+                  }`}>
+                    {formData?.status_persetujuan === 'disetujui' ? '✓ Disetujui' :
+                     formData?.status_persetujuan === 'ditolak' ? '✗ Ditolak' :
+                     formData?.status_persetujuan === 'dipertimbangkan' ? '⏳ Dipertimbangkan' :
+                     formData?.status_persetujuan || "-"}
                   </p>
                 </div>
               </div>
