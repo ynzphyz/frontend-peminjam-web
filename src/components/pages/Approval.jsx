@@ -2,11 +2,15 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import ConfirmationModal from "../ui/ConfirmationModal";
 
 export default function Approval() {
+  const location = useLocation();
+  const initialPeminjamanId = location.state?.peminjamanId || "";
+  
   const [approvalForm, setApprovalForm] = useState({
-    peminjaman_id: "",
+    peminjaman_id: initialPeminjamanId,
     disetujui_oleh: "",
     status_persetujuan: "",
   });
@@ -24,6 +28,13 @@ export default function Approval() {
     }
     return () => clearTimeout(timer);
   }, [success]);
+
+  // Auto-fetch data if peminjaman_id is provided from navigation
+  useEffect(() => {
+    if (initialPeminjamanId) {
+      fetchPeminjamData(initialPeminjamanId);
+    }
+  }, [initialPeminjamanId]);
 
   const fetchPeminjamData = async (id) => {
     if (!id) {
@@ -60,6 +71,7 @@ export default function Approval() {
       
       if (data && data.nama) {
         toast.success(`✅ Data peminjaman ditemukan: ${data.nama}`);
+        setPeminjamData(data); // Set peminjam data
         return data;
       }
       
