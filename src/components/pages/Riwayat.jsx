@@ -86,12 +86,17 @@ export default function Riwayat() {
   const loadHistory = async () => {
     setLoading(true);
     try {
-      console.log("🔍 Fetching dari: http://localhost:8080/history");
+      console.log("🔍 Fetching dari: http://localhost:8080/peminjaman");
 
-      const data = await fetchHistory();
-      console.log("✅ Data dari backend:", data);
+      const response = await fetchHistory();
+      console.log("✅ Response dari backend:", response);
 
-      setHistoryData(data || []);
+      // Backend returns {success: true, message: "...", data: [...]}
+      // Extract the data array from the response
+      const dataArray = response?.data || [];
+      console.log("✅ Data array:", dataArray);
+
+      setHistoryData(dataArray);
     } catch (error) {
       console.error("❌ Error fetching history:", error);
       toast.error("Gagal memuat data riwayat");
@@ -105,14 +110,19 @@ export default function Riwayat() {
     setDetailLoading(true);
     try {
       console.log(
-        "🔍 Fetching detail dari: http://localhost:8080/get-peminjam-data?id=" +
+        "🔍 Fetching detail dari: http://localhost:8080/peminjaman/" +
           id
       );
 
-      const data = await fetchPeminjamData(id);
-      console.log("✅ Detail data:", data);
+      const response = await fetchPeminjamData(id);
+      console.log("✅ Detail response:", response);
 
-      setDetailData(data);
+      // Backend returns {success: true, message: "...", data: {...}}
+      // Extract the data object from the response
+      const detailObj = response?.data || {};
+      console.log("✅ Detail object:", detailObj);
+
+      setDetailData(detailObj);
       setShowDetailModal(true);
     } catch (error) {
       console.error("❌ Error fetching detail:", error);
@@ -141,12 +151,12 @@ export default function Riwayat() {
   const filteredData = historyData.filter((item) => {
     const nameMatch =
       !searchTerm ||
-      (item.name &&
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (item.namaAlat &&
-        item.namaAlat.toLowerCase().includes(searchTerm.toLowerCase()));
+      (item.nama &&
+        item.nama.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.nama_alat &&
+        item.nama_alat.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const dateMatch = !selectedDate || item.date === selectedDate;
+    const dateMatch = !selectedDate || item.tanggal === selectedDate;
 
     const uiStatus = getUiStatus(item.status);
     const statusMatch =
@@ -359,7 +369,7 @@ export default function Riwayat() {
                         <div className="flex-1 space-y-3">
                           <div className="space-y-1">
                             <h3 className="text-lg font-bold text-white">
-                              {item.name || "Tidak Diketahui"}
+                              {item.nama || "Tidak Diketahui"}
                             </h3>
                             <p className="text-sm text-gray-400">
                               🆔 ID:{" "}
@@ -373,16 +383,16 @@ export default function Riwayat() {
                             <div className="text-gray-400">
                               🔧{" "}
                               <span className="text-gray-300">
-                                {item.namaAlat || "-"}
+                                {item.nama_alat || "-"}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-400">
                               <span>📅</span>
-                              <span className="text-gray-300">{item.date}</span>
+                              <span className="text-gray-300">{item.tanggal}</span>
                             </div>
                             <div className="text-gray-400">
                               📋{" "}
-                              <span className="text-gray-300">{item.type}</span>
+                              <span className="text-gray-300">Peminjaman</span>
                             </div>
                           </div>
                         </div>
@@ -595,7 +605,7 @@ export default function Riwayat() {
                             🔧 Nama Alat
                           </p>
                           <p className="text-lg font-semibold text-white">
-                            {detailData.namaAlat || "-"}
+                            {detailData.nama_alat || detailData.namaAlat || "-"}
                           </p>
                         </div>
                         <div className="bg-[#101a2b]/50 border border-blue-800 rounded-lg p-4">
@@ -603,7 +613,7 @@ export default function Riwayat() {
                             📦 Jumlah Alat
                           </p>
                           <p className="text-lg font-semibold text-white">
-                            {detailData.jumlahAlat || "-"} unit
+                            {detailData.jumlah_alat || detailData.jumlahAlat || "-"} unit
                           </p>
                         </div>
                       </div>
@@ -615,7 +625,7 @@ export default function Riwayat() {
                             📅 Tanggal Pinjam
                           </p>
                           <p className="text-lg font-semibold text-white">
-                            {detailData.tanggalPinjam || "-"}
+                            {detailData.tanggal_peminjaman || detailData.tanggalPeminjaman || "-"}
                           </p>
                         </div>
                         <div className="bg-[#101a2b]/50 border border-blue-800 rounded-lg p-4">
@@ -623,7 +633,7 @@ export default function Riwayat() {
                             📆 Tanggal Kembali
                           </p>
                           <p className="text-lg font-semibold text-white">
-                            {detailData.tanggalKembali || "-"}
+                            {detailData.tanggal_pengembalian || detailData.tanggalPengembalian || "-"}
                           </p>
                         </div>
                       </div>
@@ -635,7 +645,7 @@ export default function Riwayat() {
                             ⏱️ Lama Pinjam
                           </p>
                           <p className="text-lg font-semibold text-white">
-                            {detailData.lamaPinjam || "-"}
+                            {detailData.lama_pinjam || detailData.lamaPinjam || "-"} hari
                           </p>
                         </div>
                         <div className="bg-[#101a2b]/50 border border-blue-800 rounded-lg p-4">
@@ -643,7 +653,7 @@ export default function Riwayat() {
                             📱 No. WhatsApp
                           </p>
                           <p className="text-lg font-semibold text-white">
-                            {detailData.noWA || "-"}
+                            {detailData.no_wa || detailData.noWA || "-"}
                           </p>
                         </div>
                       </div>
