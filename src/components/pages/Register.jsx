@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { toast } from "react-toastify";
 import axios from "axios";
+// eslint-disable-next-line 
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
 
@@ -12,10 +14,14 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
+    nis: "",
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    role: "user",
+    kelas: "",
+    phone: "",
   });
 
   const handleInputChange = (e) => {
@@ -68,11 +74,22 @@ const Register = () => {
 
       console.log("Google register berhasil:", response.data);
       
+      // Show success toast
+      toast.success("Registrasi dengan Google berhasil! Silakan login.", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+      
       // Redirect ke login setelah berhasil register via Google
-      navigate("/login");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } catch (err) {
       console.error("Google register error:", err);
-      setError(err.response?.data?.error || "Registrasi dengan Google gagal");
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error ||
+                          "Registrasi dengan Google gagal";
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -93,14 +110,17 @@ const Register = () => {
       setError("");
 
       const response = await axios.post(
-        "http://localhost:8080/auth/register",
+        "http://localhost:8080/register",
         {
+          nis: formData.nis,
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          role: formData.role,
+          kelas: formData.kelas || "",
+          phone: formData.phone || "",
         },
         {
-          withCredentials: true,
           headers: {
             "Content-Type": "application/json",
           },
@@ -109,8 +129,16 @@ const Register = () => {
 
       console.log("Registrasi berhasil:", response.data);
       
-      // Redirect ke login setelah berhasil
-      navigate("/login");
+      // Check if backend response has success field
+      if (response.data.success || response.status === 201) {
+        toast.success("✅ Registrasi berhasil! Silakan login.");
+        // Redirect ke login setelah berhasil
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
+      } else {
+        setError(response.data.message || "Registrasi gagal");
+      }
     } catch (err) {
       console.error("Register error:", err);
       setError(
@@ -194,10 +222,30 @@ const Register = () => {
           onSubmit={handleRegister}
           className="space-y-3"
         >
+          {/* NIS Input */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+              NIS <span className="text-red-400">*</span>
+            </label>
+            <div className="relative">
+              <User size={16} className="absolute left-3 top-2.5 text-blue-400" />
+              <input
+                type="text"
+                name="nis"
+                value={formData.nis}
+                onChange={handleInputChange}
+                placeholder="Nomor Induk Siswa"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+                disabled={loading}
+                required
+              />
+            </div>
+          </div>
+
           {/* Name Input */}
           <div>
             <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-              Nama Lengkap
+              Nama Lengkap <span className="text-red-400">*</span>
             </label>
             <div className="relative">
               <User size={16} className="absolute left-3 top-2.5 text-blue-400" />
@@ -209,6 +257,7 @@ const Register = () => {
                 placeholder="Masukkan nama"
                 className="w-full pl-9 pr-4 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
                 disabled={loading}
+                required
               />
             </div>
           </div>
@@ -216,7 +265,7 @@ const Register = () => {
           {/* Email Input */}
           <div>
             <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-              Email
+              Email <span className="text-red-400">*</span>
             </label>
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-2.5 text-blue-400" />
@@ -228,6 +277,45 @@ const Register = () => {
                 placeholder="name@example.com"
                 className="w-full pl-9 pr-4 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
                 disabled={loading}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Kelas Input */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+              Kelas
+            </label>
+            <div className="relative">
+              <User size={16} className="absolute left-3 top-2.5 text-blue-400" />
+              <input
+                type="text"
+                name="kelas"
+                value={formData.kelas}
+                onChange={handleInputChange}
+                placeholder="Contoh: XII RPL 1"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {/* Phone Input */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+              No. WhatsApp
+            </label>
+            <div className="relative">
+              <Mail size={16} className="absolute left-3 top-2.5 text-blue-400" />
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                placeholder="08xxxxxxxxxx"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
+                disabled={loading}
               />
             </div>
           </div>
@@ -235,7 +323,7 @@ const Register = () => {
           {/* Password Input */}
           <div>
             <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-              Password
+              Password <span className="text-red-400">*</span>
             </label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-2.5 text-blue-400" />
@@ -247,6 +335,8 @@ const Register = () => {
                 placeholder="Minimal 6 karakter"
                 className="w-full pl-9 pr-10 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
                 disabled={loading}
+                required
+                minLength={6}
               />
               <button
                 type="button"
@@ -262,7 +352,7 @@ const Register = () => {
           {/* Confirm Password Input */}
           <div>
             <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-              Konfirmasi Password
+              Konfirmasi Password <span className="text-red-400">*</span>
             </label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-2.5 text-blue-400" />
@@ -274,6 +364,7 @@ const Register = () => {
                 placeholder="Ulangi password"
                 className="w-full pl-9 pr-10 py-2 text-sm bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition disabled:opacity-50"
                 disabled={loading}
+                required
               />
               <button
                 type="button"

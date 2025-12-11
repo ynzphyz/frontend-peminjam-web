@@ -59,15 +59,22 @@ export const apiCall = async (endpoint, options = {}) => {
 // Specific API functions
 export const submitPeminjaman = async (formData) => {
   const data = new FormData();
-  Object.keys(formData).forEach((key) => {
-    if (formData[key] !== null && formData[key] !== undefined) {
-      data.append(key, formData[key]);
-    }
-  });
+  
+  // Extract foto file
+  const foto = formData.foto;
+  delete formData.foto;
+  
+  // Send other fields as JSON in 'data' field
+  data.append('data', JSON.stringify(formData));
+  
+  // Append foto file if exists
+  if (foto) {
+    data.append('foto', foto);
+  }
 
   try {
-    console.log("📤 POST /pinjam with FormData");
-    const response = await fetch(`${API_BASE_URL}/pinjam`, {
+    console.log("📤 POST /peminjaman with FormData");
+    const response = await fetch(`${API_BASE_URL}/peminjaman`, {
       method: "POST",
       body: data,
       headers: getAuthHeaders(),
@@ -133,31 +140,36 @@ export const submitPengembalian = async (formData) => {
 };
 
 export const fetchHistory = async () => {
-  console.log("📥 GET /history");
-  return apiCall("/history", {
+  console.log("📥 GET /peminjaman");
+  return apiCall("/peminjaman", {
     method: "GET",
   });
 };
 
 export const fetchPeminjamData = async (id) => {
-  console.log(`📥 GET /get-peminjam-data?id=${id}`);
-  return apiCall(`/get-peminjam-data?id=${id}`, {
+  console.log(`📥 GET /peminjaman/${id}`);
+  return apiCall(`/peminjaman/${id}`, {
     method: "GET",
   });
 };
 
-export const deleteHistory = async (id) => {
-  console.log(`🗑️ POST /delete-history with id=${id}`);
-  return apiCall(`/delete-history`, {
-    method: "POST",
-    body: JSON.stringify({ id }),
-  });
+// Note: Delete functionality not implemented in backend yet
+export const deleteHistory = async () => {
+  console.warn('⚠️ Delete endpoint not implemented in backend');
+  throw new Error('Delete functionality not available');
 };
 
-// Admin dashboard stats
+// Note: Stats endpoint not implemented in backend yet
 export const fetchStats = async () => {
-  console.log("📊 GET /stats");
-  return apiCall("/stats", {
-    method: "GET",
-  });
+  console.warn('⚠️ Stats endpoint not implemented in backend');
+  // Return mock data for now
+  return {
+    success: true,
+    data: {
+      totalPeminjaman: 0,
+      activePeminjaman: 0,
+      totalPengembalian: 0,
+      totalApproval: 0
+    }
+  };
 };

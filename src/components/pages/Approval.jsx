@@ -6,9 +6,12 @@ import ConfirmationModal from "../ui/ConfirmationModal";
 
 export default function Approval() {
   const [approvalForm, setApprovalForm] = useState({
-    idPinjam: "",
-    approver: "",
-    statusPersetujuan: "",
+    peminjaman_id: "",
+    nomor: "",
+    tanggal_persetujuan: new Date().toISOString().split('T')[0],
+    nama_peminjam: "",
+    pembuat_persetujuan: "",
+    status_persetujuan: "",
   });
 
   const [success, setSuccess] = useState(false);
@@ -28,11 +31,11 @@ export default function Approval() {
     if (!id) return null;
     try {
       const response = await fetch(
-        `http://localhost:8080/get-peminjam-data?id=${id}`
+        `http://localhost:8080/peminjaman/${id}`
       );
       if (response.ok) {
-        const data = await response.json();
-        return data;
+        const result = await response.json();
+        return result.data || result; // Handle both {success, data} and direct response
       }
       return null;
     } catch (error) {
@@ -43,9 +46,12 @@ export default function Approval() {
 
   const resetForm = () => {
     setApprovalForm({
-      idPinjam: "",
-      approver: "",
-      statusPersetujuan: "",
+      peminjaman_id: "",
+      nomor: "",
+      tanggal_persetujuan: new Date().toISOString().split('T')[0],
+      nama_peminjam: "",
+      pembuat_persetujuan: "",
+      status_persetujuan: "",
     });
   };
 
@@ -57,25 +63,35 @@ export default function Approval() {
     });
   };
 
-  const handleIdPinjamChange = (e) => {
+  const handleIdPinjamChange = async (e) => {
+    const idValue = e.target.value.trim();
     setApprovalForm({
       ...approvalForm,
-      idPinjam: e.target.value.trim(),
+      peminjaman_id: idValue,
     });
+    
+    // Auto-fetch peminjaman data when ID is entered
+    if (idValue) {
+      const peminjamData = await fetchPeminjamData(idValue);
+      if (peminjamData) {
+        setApprovalForm(prev => ({
+          ...prev,
+          nama_peminjam: peminjamData.nama || "",
+        }));
+      }
+    }
   };
 
   const handleApprovalSubmit = async (e) => {
     e.preventDefault();
-    const peminjamData = await fetchPeminjamData(approvalForm.idPinjam);
+    const peminjamData = await fetchPeminjamData(approvalForm.peminjaman_id);
     if (!peminjamData) {
       toast.error("Data peminjaman tidak ditemukan!");
       return;
     }
     setFormData({
-      idPinjam: approvalForm.idPinjam,
-      approver: approvalForm.approver,
-      statusPersetujuan: approvalForm.statusPersetujuan,
-      peminjamData: peminjamData,
+      ...approvalForm,
+      nama_peminjam: peminjamData.nama,
     });
     setShowConfirmation(true);
   };
@@ -85,27 +101,56 @@ export default function Approval() {
     setShowConfirmation(false);
     setSuccess(false);
 
-    const formData = new FormData();
-    formData.append("idPinjam", approvalForm.idPinjam);
-    formData.append("approver", approvalForm.approver);
-    formData.append("statusPersetujuan", approvalForm.statusPersetujuan);
+    // Prepare request data matching backend ApprovalRequest
+    const requestData = {
+      nomor: approvalForm.nomor,
+      tanggal_persetujuan: approvalForm.tanggal_persetujuan,
+      nama_peminjam: approvalForm.nama_peminjam,
+      pembuat_persetujuan: approvalForm.pembuat_persetujuan,
+      peminjaman_id: parseInt(approvalForm.peminjaman_id),
+      status_persetujuan: approvalForm.status_persetujuan,
+    };
+
+    // Get JWT token from sessionStorage user object
+    const userStr = sessionStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const token = user?.token;
+
+    if (!token) {
+      toast.error("❌ Anda harus login terlebih dahulu");
+      return;
+    }
 
     try {
-      fetch("http://localhost:8080/approval-request-new", {
+      const response = await fetch("http://localhost:8080/approval", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+        body: JSON.stringify(requestData),
       });
 
-      setTimeout(() => {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
         toast.success("✅ Permohonan persetujuan dikirim.");
         setSuccess(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
         resetForm();
-        setLoading(false);
-      }, 1500);
+      } else {
+        toast.error(`❌ ${result.message || 'Gagal mengirim approval'}`);
+      }
+      setLoading(false);
     } catch (err) {
-      toast.error("Gagal mengirim data approval.");
-      console.error("Background approval request error:", err);
+      toast.error("❌ Gagal mengirim data approval.");
+      console.error("Approval request error:", err);
       setLoading(false);
     }
   };
@@ -207,12 +252,12 @@ export default function Approval() {
               {/* ID Pinjam */}
               <motion.div variants={itemVariants}>
                 <label className="block font-semibold mb-3 text-blue-300">
-                  ID Pinjam
+                  ID Peminjaman
                 </label>
                 <input
-                  type="text"
-                  name="idPinjam"
-                  value={approvalForm.idPinjam}
+                  type="number"
+                  name="peminjaman_id"
+                  value={approvalForm.peminjaman_id}
                   onChange={handleIdPinjamChange}
                   className="w-full bg-[#0f3460]/50 border border-blue-700/50 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition placeholder:text-slate-500"
                   placeholder="Masukkan ID peminjaman"
@@ -220,30 +265,52 @@ export default function Approval() {
                 />
               </motion.div>
 
-              {/* Approver Selection */}
+              {/* Nomor Approval */}
               <motion.div variants={itemVariants}>
                 <label className="block font-semibold mb-3 text-blue-300">
-                  Pilih Approver
+                  Nomor Approval
                 </label>
-                <div className="space-y-2">
-                  {["Kepala Bengkel", "Penanggung Jawab"].map((role) => (
-                    <label
-                      key={role}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-blue-700/30 hover:border-blue-500/50 cursor-pointer transition hover:bg-blue-900/20"
-                    >
-                      <input
-                        type="radio"
-                        name="approver"
-                        value={role}
-                        checked={approvalForm.approver === role}
-                        onChange={handleApprovalChange}
-                        className="w-4 h-4 accent-blue-500"
-                        required
-                      />
-                      <span className="font-medium">{role}</span>
-                    </label>
-                  ))}
-                </div>
+                <input
+                  type="text"
+                  name="nomor"
+                  value={approvalForm.nomor}
+                  onChange={handleApprovalChange}
+                  className="w-full bg-[#0f3460]/50 border border-blue-700/50 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition placeholder:text-slate-500"
+                  placeholder="Contoh: APR/2024/001"
+                  required
+                />
+              </motion.div>
+
+              {/* Nama Peminjam (Auto-filled) */}
+              <motion.div variants={itemVariants}>
+                <label className="block font-semibold mb-3 text-blue-300">
+                  Nama Peminjam
+                </label>
+                <input
+                  type="text"
+                  name="nama_peminjam"
+                  value={approvalForm.nama_peminjam}
+                  onChange={handleApprovalChange}
+                  className="w-full bg-[#0f3460]/50 border border-blue-700/50 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition placeholder:text-slate-500"
+                  placeholder="Akan terisi otomatis dari ID peminjaman"
+                  required
+                />
+              </motion.div>
+
+              {/* Pembuat Persetujuan */}
+              <motion.div variants={itemVariants}>
+                <label className="block font-semibold mb-3 text-blue-300">
+                  Dibuat Oleh
+                </label>
+                <input
+                  type="text"
+                  name="pembuat_persetujuan"
+                  value={approvalForm.pembuat_persetujuan}
+                  onChange={handleApprovalChange}
+                  className="w-full bg-[#0f3460]/50 border border-blue-700/50 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition placeholder:text-slate-500"
+                  placeholder="Nama pembuat persetujuan"
+                  required
+                />
               </motion.div>
 
               {/* Status Persetujuan */}
@@ -278,11 +345,9 @@ export default function Approval() {
                     >
                       <input
                         type="radio"
-                        name="statusPersetujuan"
+                        name="status_persetujuan"
                         value={status.value}
-                        checked={
-                          approvalForm.statusPersetujuan === status.value
-                        }
+                        checked={approvalForm.status_persetujuan === status.value}
                         onChange={handleApprovalChange}
                         className="w-4 h-4 accent-blue-500"
                         required

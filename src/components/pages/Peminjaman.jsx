@@ -4,6 +4,15 @@ import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import ConfirmationModal from "../ui/ConfirmationModal";
 
+// Helper function to calculate days between two dates
+const calculateDaysBetween = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffTime = Math.abs(end - start);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays || 1; // Minimum 1 day
+};
+
 export default function Peminjaman() {
   const [peminjamanForm, setPeminjamanForm] = useState({
     nama: "",
@@ -72,33 +81,66 @@ export default function Peminjaman() {
     setLoading(true);
     setShowConfirmation(false);
 
+    // Prepare data object matching backend PeminjamanRequest
+    const requestData = {
+      tanggal: new Date().toISOString().split("T")[0], // Current date
+      nama: peminjamanForm.nama,
+      kelas: peminjamanForm.kelas,
+      nis: peminjamanForm.nis,
+      no_wa: peminjamanForm.noWa,
+      nama_alat: peminjamanForm.namaAlat,
+      jumlah_alat: parseInt(peminjamanForm.jumlahAlat),
+      tanggal_peminjaman: peminjamanForm.tanggalPinjam,
+      tanggal_pengembalian: peminjamanForm.tanggalKembali,
+      keterangan: peminjamanForm.keterangan || "",
+      lama_pinjam: calculateDaysBetween(
+        peminjamanForm.tanggalPinjam,
+        peminjamanForm.tanggalKembali
+      ),
+    };
+
     const formData = new FormData();
-    formData.append("nama", peminjamanForm.nama);
-    formData.append("kelas", peminjamanForm.kelas);
-    formData.append("nis", peminjamanForm.nis);
-    formData.append("noWa", peminjamanForm.noWa);
-    formData.append("namaAlat", peminjamanForm.namaAlat);
-    formData.append("jumlahAlat", peminjamanForm.jumlahAlat);
-    formData.append("tanggalPinjam", peminjamanForm.tanggalPinjam);
-    formData.append("tanggalKembali", peminjamanForm.tanggalKembali);
-    formData.append("keterangan", peminjamanForm.keterangan);
+    formData.append("data", JSON.stringify(requestData));
     if (peminjamanForm.foto) {
       formData.append("foto", peminjamanForm.foto);
     }
 
+    // Get JWT token from sessionStorage user object
+    const userStr = sessionStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const token = user?.token;
+
+    if (!token) {
+      toast.error("❌ Anda harus login terlebih dahulu");
+      return;
+    }
+
     try {
-      fetch("http://localhost:8080/pinjam", {
+      const response = await fetch("http://localhost:8080/peminjaman", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
         body: formData,
       });
 
-      setTimeout(() => {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
         toast.success("✅ Peminjaman berhasil dikirim!");
         setSuccess(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
         resetForm();
-        setLoading(false);
-      }, 1500);
+      } else {
+        toast.error(`❌ ${result.message || "Gagal mengirim peminjaman"}`);
+      }
+      setLoading(false);
     } catch (err) {
       toast.error("❌ Gagal mengirim peminjaman.");
       console.error("Peminjaman request error:", err);

@@ -15,6 +15,7 @@ export default function Pengembalian() {
   const [loading, setLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [formData, setFormData] = useState(null);
+  const [peminjamanData, setPeminjamanData] = useState(null);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -29,16 +30,17 @@ export default function Pengembalian() {
     if (!id) return null;
     try {
       console.log(
-        "🔍 Fetching data dari: http://localhost:8080/get-peminjam-data?id=" +
+        "🔍 Fetching data dari: http://localhost:8080/peminjaman/" +
           id
       );
 
       const response = await fetch(
-        `http://localhost:8080/get-peminjam-data?id=${id}`
+        `http://localhost:8080/peminjaman/${id}`
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        const data = result.data || result; // Handle both {success, data} and direct response
         console.log("✅ Data ditemukan:", data);
         return data;
       } else {
@@ -89,20 +91,21 @@ export default function Pengembalian() {
     }
 
     setLoading(true);
-    const peminjamanData = await fetchPeminjamanData(
+    const fetchedData = await fetchPeminjamanData(
       pengembalianForm.idPeminjaman
     );
     setLoading(false);
 
-    if (!peminjamanData) {
+    if (!fetchedData) {
       toast.error("❌ Data peminjaman tidak ditemukan!");
       return;
     }
 
+    setPeminjamanData(fetchedData);
     setFormData({
       ...pengembalianForm,
       idPeminjaman: pengembalianForm.idPeminjaman,
-      peminjamanData: peminjamanData,
+      peminjamanData: fetchedData,
     });
     setShowConfirmation(true);
   };
@@ -111,37 +114,59 @@ export default function Pengembalian() {
     setLoading(true);
     setShowConfirmation(false);
 
+    // Prepare data matching backend PengembalianRequest
+    const requestData = {
+      peminjaman_id: parseInt(pengembalianForm.idPeminjaman),
+      nama: peminjamanData?.nama || "",
+      tanggal_pengembalian: new Date().toISOString().split('T')[0],
+      kondisi_alat: pengembalianForm.kondisiAlat,
+      keterangan: pengembalianForm.keteranganPengembalian || "",
+    };
+
     const formDataToSend = new FormData();
-    formDataToSend.append("idPeminjaman", pengembalianForm.idPeminjaman);
-    formDataToSend.append("kondisiAlat", pengembalianForm.kondisiAlat);
-    formDataToSend.append(
-      "keteranganPengembalian",
-      pengembalianForm.keteranganPengembalian
-    );
+    formDataToSend.append("data", JSON.stringify(requestData));
     if (pengembalianForm.foto) {
       formDataToSend.append("foto", pengembalianForm.foto);
+    }
+
+    // Get JWT token from sessionStorage user object
+    const userStr = sessionStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const token = user?.token;
+
+    if (!token) {
+      toast.error("❌ Anda harus login terlebih dahulu");
+      return;
     }
 
     try {
       console.log("📤 Mengirim ke backend...");
       const response = await fetch("http://localhost:8080/pengembalian", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
         body: formDataToSend,
       });
 
-      if (response.ok) {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
         console.log("✅ Pengembalian berhasil!");
         toast.success("✅ Pengembalian berhasil dikirim!");
         setSuccess(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
         resetForm();
-        setLoading(false);
       } else {
-        const errorText = await response.text();
-        console.error("❌ Error response:", response.status, errorText);
-        toast.error("❌ Gagal mengirim pengembalian.");
-        setLoading(false);
+        toast.error(`❌ ${result.message || 'Gagal mengirim pengembalian'}`);
       }
+      setLoading(false);
     } catch (err) {
       console.error("❌ Pengembalian request error:", err);
       toast.error("❌ Gagal mengirim pengembalian.");

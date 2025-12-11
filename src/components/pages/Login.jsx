@@ -34,8 +34,12 @@ const Login = () => {
       );
 
       console.log("Backend response:", response);
-      const { user, token } = response.data || {};
+      
+      // Backend returns: { success, message, data: { token, user } }
+      const responseData = response.data?.data || response.data;
+      const { token, user } = responseData;
       const { email, name, role } = user || {};
+      
       console.log("Parsed user:", { email, name, role, token });
 
       // Save user to context with token
@@ -49,10 +53,10 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError(
-        err.response?.data?.error ||
-          "Login gagal. Silakan coba lagi."
-      );
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error ||
+                          "Login gagal. Silakan coba lagi.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -69,12 +73,14 @@ const Login = () => {
       setError("");
 
       const response = await axios.post(
-        "http://localhost:8080/auth/login",
+        "http://localhost:8080/login",
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
 
-      const { user, token } = response.data || {};
+      // Backend returns: { success, message, data: { token, user } }
+      const responseData = response.data?.data || response.data;
+      const { token, user } = responseData;
       const { email: eResp, name, role } = user || {};
       login({ email: eResp, name, role, token });
 
@@ -85,10 +91,10 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Manual login error:", err);
-      setError(
-        err.response?.data?.error ||
-          "Login gagal. Pastikan sudah registrasi dan data benar."
-      );
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error ||
+                          "Login gagal. Periksa email dan password Anda.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
