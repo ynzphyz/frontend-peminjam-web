@@ -61,13 +61,17 @@ const CompleteProfile = () => {
         throw new Error(result.message || "Gagal melengkapi profile");
       }
 
+      console.log("Complete profile response:", result);
+
       // Update user context dengan data lengkap
       const updatedUser = {
         ...user,
         ...result.data,
         profile_completed: true,
+        token: user?.token, // Preserve token
       };
       
+      console.log("Updated user after complete profile:", updatedUser);
       updateUser(updatedUser);
 
       // Redirect ke dashboard

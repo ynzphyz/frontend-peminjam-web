@@ -26,8 +26,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (userData) => {
-    setUser(userData);
-    sessionStorage.setItem("user", JSON.stringify(userData));
+    // Merge with existing user data to preserve token
+    const updatedUser = {
+      ...user,
+      ...userData,
+    };
+    console.log("Updating user in context:", updatedUser);
+    setUser(updatedUser);
+    sessionStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
   const logout = () => {

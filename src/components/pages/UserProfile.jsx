@@ -10,24 +10,79 @@ const UserProfile = () => {
   const { user, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    phone: user?.phone || "",
-    kelas: user?.kelas || "",
+    nis: "",
+    name: "",
+    phone: "",
+    kelas: "",
   });
 
-  // Update formData when user data changes
+  // Initialize userData with current user data
   useEffect(() => {
-    if (user) {
-      console.log("User data in UserProfile:", user);
+    if (user && !userData) {
+      setUserData(user);
       setFormData({
+        nis: user.nis || "",
         name: user.name || "",
         phone: user.phone || "",
         kelas: user.kelas || "",
       });
     }
-  }, [user]);
+  }, [user, userData]);
+
+  // Fetch fresh user data on mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user?.id) {
+        return;
+      }
+      
+      setRefreshing(true);
+      
+      try {
+        const token = user.token || JSON.parse(sessionStorage.getItem("user") || "{}")?.token;
+        console.log("Fetching user data for ID:", user.id);
+        
+        const response = await axios.get(
+          `${API_BASE_URL}/users/${user.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        console.log("API Response:", response.data);
+        
+        if (response.data.success) {
+          const freshUserData = response.data.data;
+          console.log("Fresh user data from API:", freshUserData);
+          
+          setUserData(freshUserData);
+          
+          // Update form data
+          setFormData({
+            nis: freshUserData.nis || "",
+            name: freshUserData.name || "",
+            phone: freshUserData.phone || "",
+            kelas: freshUserData.kelas || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        console.error("Error response:", error.response?.data);
+      } finally {
+        setRefreshing(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchUserData();
+    }
+  }, [user?.id]); // Run when user.id is available
 
   // Show loading if user data not available yet
   if (!user) {
@@ -38,7 +93,9 @@ const UserProfile = () => {
     );
   }
 
-  console.log("Current user object:", user);
+  const displayUser = userData || user;
+
+  console.log("Current user object:", displayUser);
   console.log("FormData:", formData);
 
   const handleInputChange = (e) => {
@@ -56,9 +113,17 @@ const UserProfile = () => {
 
     try {
       const token = JSON.parse(sessionStorage.getItem("user") || "{}")?.token;
+      
+      // Only send editable fields (exclude nis)
+      const updateData = {
+        name: formData.name,
+        phone: formData.phone,
+        kelas: formData.kelas,
+      };
+      
       const response = await axios.put(
         `${API_BASE_URL}/users/${user.id}`,
-        formData,
+        updateData,
         {
           headers: {
             "Content-Type": "application/json",
@@ -68,10 +133,33 @@ const UserProfile = () => {
       );
       
       if (response.data.success) {
-        // Update user context dengan data terbaru
-        updateUser(response.data.data);
-        setMessage({ type: "success", text: "Profile berhasil diperbarui!" });
-        setIsEditing(false);
+        // Fetch fresh data dari server
+        const freshDataResponse = await axios.get(
+          `${API_BASE_URL}/users/${user.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        if (freshDataResponse.data.success) {
+          const freshUserData = freshDataResponse.data.data;
+          const updatedUser = {
+            ...user,
+            ...freshUserData,
+          };
+          updateUser(updatedUser);
+          setUserData(freshUserData);
+          setFormData({
+            nis: freshUserData.nis || "",
+            name: freshUserData.name || "",
+            phone: freshUserData.phone || "",
+            kelas: freshUserData.kelas || "",
+          });
+          setMessage({ type: "success", text: "Profile berhasil diperbarui!" });
+          setIsEditing(false);
+        }
       }
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -88,14 +176,15 @@ const UserProfile = () => {
     {
       icon: IdCard,
       label: "NIS",
-      value: user?.nis || "-",
+      value: isEditing ? formData.nis : (displayUser?.nis || "-"),
+      name: "nis",
       color: "from-blue-400 to-blue-600",
       editable: false,
     },
     {
       icon: User,
       label: "Nama Lengkap",
-      value: formData.name,
+      value: isEditing ? formData.name : (displayUser?.name || "-"),
       name: "name",
       color: "from-purple-400 to-purple-600",
       editable: true,
@@ -103,14 +192,14 @@ const UserProfile = () => {
     {
       icon: Mail,
       label: "Email",
-      value: user?.email || "-",
+      value: displayUser?.email || "-",
       color: "from-cyan-400 to-cyan-600",
       editable: false,
     },
     {
       icon: GraduationCap,
       label: "Kelas",
-      value: formData.kelas,
+      value: isEditing ? formData.kelas : (displayUser?.kelas || "-"),
       name: "kelas",
       color: "from-green-400 to-green-600",
       editable: true,
@@ -118,7 +207,7 @@ const UserProfile = () => {
     {
       icon: Phone,
       label: "Nomor WhatsApp",
-      value: formData.phone,
+      value: isEditing ? formData.phone : (displayUser?.phone || "-"),
       name: "phone",
       color: "from-orange-400 to-orange-600",
       editable: true,
@@ -126,8 +215,8 @@ const UserProfile = () => {
     {
       icon: Calendar,
       label: "Bergabung Sejak",
-      value: user?.created_at
-        ? new Date(user.created_at).toLocaleDateString("id-ID", {
+      value: displayUser?.created_at
+        ? new Date(displayUser.created_at).toLocaleDateString("id-ID", {
             weekday: "long",
             day: "numeric",
             month: "long",
@@ -184,19 +273,19 @@ const UserProfile = () => {
                 whileHover={{ scale: 1.05 }}
                 className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center text-white font-bold text-4xl shadow-2xl shadow-blue-500/50 ring-4 ring-blue-500/30"
               >
-                {user?.name?.charAt(0).toUpperCase() || "U"}
+                {displayUser?.name?.charAt(0).toUpperCase() || "U"}
               </motion.div>
 
               {/* User Info */}
               <div className="flex-1 text-center sm:text-left">
                 <h2 className="text-2xl font-bold text-white mb-1">
-                  {user?.name || "User"}
+                  {displayUser?.name || "User"}
                 </h2>
-                <p className="text-gray-400 text-sm mb-3">{user?.email}</p>
+                <p className="text-gray-400 text-sm mb-3">{displayUser?.email}</p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/30 border border-blue-500/30 rounded-full">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   <span className="text-sm font-semibold text-gray-300 capitalize">
-                    {user?.role || "user"}
+                    {displayUser?.role || "user"}
                   </span>
                 </div>
               </div>
