@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { LogOut } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import UserProfileDropdown from "./UserProfileDropdown";
 
 const Navbar = () => {
   const location = useLocation();
@@ -164,23 +165,9 @@ const Navbar = () => {
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center gap-3">
-              {isAuthenticated ? (
-                <>
-                  <div className="text-sm text-gray-300 px-4 py-2 rounded-lg bg-blue-600/20">
-                    <span className="font-semibold text-blue-200">{user?.name}</span>
-                    <span className="text-gray-400 ml-2">({user?.role})</span>
-                  </div>
-                  <motion.button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold text-sm hover:from-red-700 hover:to-red-800 transition-all"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <LogOut size={16} />
-                    Logout
-                  </motion.button>
-                </>
-              ) : (
+              {isAuthenticated && user ? (
+                <UserProfileDropdown />
+              ) : !isAuthenticated ? (
                 <>
                   <motion.button
                     onClick={() => navigate("/login")}
@@ -199,7 +186,7 @@ const Navbar = () => {
                     Register
                   </motion.button>
                 </>
-              )}
+              ) : null}
             </div>
 
             {/* Mobile Hamburger Button */}

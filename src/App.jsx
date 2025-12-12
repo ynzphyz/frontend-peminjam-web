@@ -22,9 +22,19 @@ import Peminjaman from "./components/pages/Peminjaman";
 import Approval from "./components/pages/Approval";
 import Pengembalian from "./components/pages/Pengembalian";
 import Riwayat from "./components/pages/Riwayat";
+import UserProfile from "./components/pages/UserProfile";
 
 function App() {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+
+  // Error boundary fallback
+  React.useEffect(() => {
+    const handleError = (event) => {
+      console.error("Global error caught:", event.error);
+    };
+    window.addEventListener("error", handleError);
+    return () => window.removeEventListener("error", handleError);
+  }, []);
 
   return (
     <>
@@ -98,6 +108,14 @@ function App() {
                     element={
                       <PageTransition>
                         <HomePage />
+                      </PageTransition>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <PageTransition>
+                        <UserProfile />
                       </PageTransition>
                     }
                   />
