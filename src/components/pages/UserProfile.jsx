@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Phone, GraduationCap, IdCard, Calendar, Save } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
@@ -17,6 +17,18 @@ const UserProfile = () => {
     kelas: user?.kelas || "",
   });
 
+  // Update formData when user data changes
+  useEffect(() => {
+    if (user) {
+      console.log("User data in UserProfile:", user);
+      setFormData({
+        name: user.name || "",
+        phone: user.phone || "",
+        kelas: user.kelas || "",
+      });
+    }
+  }, [user]);
+
   // Show loading if user data not available yet
   if (!user) {
     return (
@@ -25,6 +37,9 @@ const UserProfile = () => {
       </div>
     );
   }
+
+  console.log("Current user object:", user);
+  console.log("FormData:", formData);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -73,7 +88,7 @@ const UserProfile = () => {
     {
       icon: IdCard,
       label: "NIS",
-      value: user?.nis,
+      value: user?.nis || "-",
       color: "from-blue-400 to-blue-600",
       editable: false,
     },
@@ -88,7 +103,7 @@ const UserProfile = () => {
     {
       icon: Mail,
       label: "Email",
-      value: user?.email,
+      value: user?.email || "-",
       color: "from-cyan-400 to-cyan-600",
       editable: false,
     },
@@ -113,6 +128,7 @@ const UserProfile = () => {
       label: "Bergabung Sejak",
       value: user?.created_at
         ? new Date(user.created_at).toLocaleDateString("id-ID", {
+            weekday: "long",
             day: "numeric",
             month: "long",
             year: "numeric",
