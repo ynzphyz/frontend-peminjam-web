@@ -21,6 +21,15 @@ import {
   User,
   LogOut,
   ChevronDown,
+  Search,
+  Filter,
+  Edit2,
+  Trash2,
+  Shield,
+  Mail,
+  Phone,
+  GraduationCap,
+  IdCard,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
@@ -35,6 +44,14 @@ const AdminDashboard = () => {
   const [pendingPeminjaman, setPendingPeminjaman] = useState([]);
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  // User Management States
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [editingUser, setEditingUser] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(null);
 
   // Debug logging
   console.log("🔍 AdminDashboard - Current user:", user);
@@ -154,12 +171,153 @@ const AdminDashboard = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  // Fetch users when users tab is active
+  useEffect(() => {
+    if (activeTab === "users") {
+      fetchUsers();
+    }
+  }, [activeTab]);
 
+  // Fetch all users
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      let token = null;
+      try {
+        const userDataStr = sessionStorage.getItem("user");
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          token = userData.token;
+        }
+      } catch (err) {
+        console.error("Error parsing user data:", err);
+      }
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch("http://localhost:8080/users", {
+        method: "GET",
+        headers: headers,
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch users");
+
+      const result = await response.json();
+      const data = result.data || result;
+      setUsers(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setUsers([]);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  // Update user role
+  const handleUpdateRole = async (userId, newRole) => {
+    try {
+      let token = null;
+      try {
+        const userDataStr = sessionStorage.getItem("user");
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          token = userData.token;
+        }
+      } catch (err) {
+        console.error("Error parsing user data:", err);
+      }
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`http://localhost:8080/users/${userId}/role`, {
+        method: "PUT",
+        headers: headers,
+        body: JSON.stringify({ role: newRole }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update role");
+
+      // Refresh users list
+      await fetchUsers();
+      setEditingUser(null);
+      alert("Role berhasil diupdate!");
+    } catch (error) {
+      console.error("Error updating role:", error);
+      alert("Gagal update role: " + error.message);
+    }
+  };
+
+  // Delete user
+  const handleDeleteUser = async (userId) => {
+    try {
+      let token = null;
+      try {
+        const userDataStr = sessionStorage.getItem("user");
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          token = userData.token;
+        }
+      } catch (err) {
+        console.error("Error parsing user data:", err);
+      }
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`http://localhost:8080/users/${userId}`, {
+        method: "DELETE",
+        headers: headers,
+      });
+
+      if (!response.ok) throw new Error("Failed to delete user");
+
+      // Refresh users list
+      await fetchUsers();
+      setShowDeleteModal(null);
+      alert("User berhasil dihapus!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert("Gagal hapus user: " + error.message);
+    }
+  };
+
+  // Filter users based on search and role
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.nis?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.kelas?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesRole = roleFilter === "all" || u.role === roleFilter;
+
+    return matchesSearch && matchesRole;
+  });
+
+  // Logout handler
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  // Get initials helper
   const getInitials = (name) => {
     if (!name) return "?";
     return name
@@ -664,32 +822,369 @@ const AdminDashboard = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-gradient-to-br from-[#0f2855]/80 to-[#051530]/80 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-8 shadow-lg"
+              className="space-y-6"
             >
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <UserCheck size={24} className="text-cyan-400" />
-                User Management
-              </h2>
-              <div className="text-center py-12">
-                <Users size={48} className="text-gray-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  Fitur Segera Hadir
-                </h3>
-                <p className="text-gray-400 mb-4">
-                  User Management untuk mengelola admin dan user
-                </p>
-                <div className="text-sm text-gray-500">
-                  <p>Total Users: {stats[1].value}</p>
-                  <p className="mt-2">Backend endpoint sudah siap:</p>
-                  <ul className="list-disc list-inside mt-2 text-left max-w-md mx-auto">
-                    <li>GET /users - List semua user</li>
-                    <li>PUT /users/:id/role - Update role</li>
-                    <li>DELETE /users/:id - Hapus user</li>
-                  </ul>
+              {/* Header Card */}
+              <div className="bg-gradient-to-br from-[#0f2855]/80 to-[#051530]/80 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-6 shadow-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                      <UserCheck size={24} className="text-cyan-400" />
+                      User Management
+                    </h2>
+                    <p className="text-gray-400 text-sm mt-1">
+                      Kelola admin dan user sistem
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 px-4 py-2 rounded-lg">
+                    <p className="text-cyan-400 font-semibold">
+                      Total: {filteredUsers.length} users
+                    </p>
+                  </div>
+                </div>
+
+                {/* Search and Filter */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Cari nama, email, NIS, atau kelas..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-[#0a183d]/60 border border-blue-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-all"
+                    />
+                  </div>
+
+                  {/* Role Filter */}
+                  <div className="relative">
+                    <Filter
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
+                    <select
+                      value={roleFilter}
+                      onChange={(e) => setRoleFilter(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-[#0a183d]/60 border border-blue-500/30 rounded-lg text-white focus:outline-none focus:border-cyan-500/50 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="all">Semua Role</option>
+                      <option value="admin">Admin</option>
+                      <option value="user">User</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Users Table Card */}
+              <div className="bg-gradient-to-br from-[#0f2855]/80 to-[#051530]/80 backdrop-blur-xl rounded-2xl border border-blue-500/20 overflow-hidden shadow-lg">
+                {loadingUsers ? (
+                  <div className="text-center py-12">
+                    <div className="inline-block w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-gray-400 mt-4">Loading users...</p>
+                  </div>
+                ) : filteredUsers.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users size={48} className="text-gray-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-white mb-2">
+                      Tidak ada user
+                    </h3>
+                    <p className="text-gray-400">
+                      {searchTerm || roleFilter !== "all"
+                        ? "Tidak ada user yang sesuai dengan filter"
+                        : "Belum ada user terdaftar"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-blue-900/30 border-b border-blue-500/20">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                            User
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                            NIS
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                            Kelas
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                            Phone
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                            Role
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                            Terdaftar
+                          </th>
+                          <th className="px-6 py-4 text-center text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-500/10">
+                        {filteredUsers.map((u, index) => (
+                          <motion.tr
+                            key={u.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="hover:bg-blue-600/10 transition-colors"
+                          >
+                            {/* User Info */}
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                  {getInitials(u.name)}
+                                </div>
+                                <div>
+                                  <p className="text-white font-medium">
+                                    {u.name}
+                                  </p>
+                                  <p className="text-gray-400 text-sm flex items-center gap-1">
+                                    <Mail size={12} />
+                                    {u.email}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* NIS */}
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <IdCard size={14} className="text-blue-400" />
+                                <span className="text-sm">
+                                  {u.nis || "-"}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Kelas */}
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <GraduationCap size={14} className="text-cyan-400" />
+                                <span className="text-sm">
+                                  {u.kelas || "-"}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Phone */}
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <Phone size={14} className="text-green-400" />
+                                <span className="text-sm">
+                                  {u.phone || "-"}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Role */}
+                            <td className="px-6 py-4">
+                              {editingUser === u.id ? (
+                                <select
+                                  defaultValue={u.role}
+                                  onChange={(e) => {
+                                    if (
+                                      confirm(
+                                        `Ubah role ${u.name} menjadi ${e.target.value}?`
+                                      )
+                                    ) {
+                                      handleUpdateRole(u.id, e.target.value);
+                                    }
+                                  }}
+                                  className="px-3 py-1.5 bg-[#0a183d] border border-blue-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                                >
+                                  <option value="admin">Admin</option>
+                                  <option value="user">User</option>
+                                </select>
+                              ) : (
+                                <span
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                                    u.role === "admin"
+                                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                                      : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                                  }`}
+                                >
+                                  <Shield size={12} />
+                                  {u.role === "admin" ? "Admin" : "User"}
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Created At */}
+                            <td className="px-6 py-4">
+                              <span className="text-sm text-gray-400">
+                                {u.created_at
+                                  ? new Date(u.created_at).toLocaleDateString(
+                                      "id-ID",
+                                      {
+                                        day: "numeric",
+                                        month: "short",
+                                        year: "numeric",
+                                      }
+                                    )
+                                  : "-"}
+                              </span>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="px-6 py-4">
+                              <div className="flex items-center justify-center gap-2">
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() =>
+                                    setEditingUser(
+                                      editingUser === u.id ? null : u.id
+                                    )
+                                  }
+                                  className="p-2 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 rounded-lg text-blue-400 hover:text-blue-300 transition-all"
+                                  title="Edit Role"
+                                >
+                                  <Edit2 size={16} />
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => setShowDeleteModal(u)}
+                                  className="p-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 rounded-lg text-red-400 hover:text-red-300 transition-all"
+                                  title="Delete User"
+                                >
+                                  <Trash2 size={16} />
+                                </motion.button>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Info Footer */}
+              <div className="bg-gradient-to-br from-blue-900/20 to-cyan-900/20 backdrop-blur-xl rounded-xl border border-blue-500/20 p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle size={20} className="text-cyan-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-gray-300">
+                    <p className="font-semibold text-white mb-1">
+                      Informasi User Management
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-gray-400">
+                      <li>Klik ikon <Edit2 size={12} className="inline" /> untuk mengubah role user</li>
+                      <li>Klik ikon <Trash2 size={12} className="inline" /> untuk menghapus user</li>
+                      <li>Gunakan search bar untuk mencari user berdasarkan nama, email, NIS, atau kelas</li>
+                      <li>Filter berdasarkan role untuk melihat admin atau user saja</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </motion.div>
           )}
+
+          {/* ANALYTICS TAB */}
+          {activeTab === "analytics" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-gradient-to-br from-[#0f2855]/80 to-[#051530]/80 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-8 shadow-lg"
+            >
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <BarChart3 size={24} className="text-purple-400" />
+                Analytics
+              </h2>
+              <div className="text-center py-12">
+                <BarChart3 size={48} className="text-gray-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  Coming Soon
+                </h3>
+                <p className="text-gray-400">
+                  Fitur analytics dan statistik detail akan segera tersedia
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* PRODUCTS/EQUIPMENT TAB */}
+          {activeTab === "products" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-gradient-to-br from-[#0f2855]/80 to-[#051530]/80 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-8 shadow-lg"
+            >
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <Package size={24} className="text-green-400" />
+                Equipment Management
+              </h2>
+              <div className="text-center py-12">
+                <Package size={48} className="text-gray-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  Coming Soon
+                </h3>
+                <p className="text-gray-400">
+                  Fitur manajemen equipment/alat akan segera tersedia
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Delete Confirmation Modal */}
+          <AnimatePresence>
+            {showDeleteModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                onClick={() => setShowDeleteModal(null)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-gradient-to-br from-[#0f2855] to-[#051530] border border-red-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-3 bg-red-600/20 rounded-full">
+                      <AlertCircle size={24} className="text-red-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white">
+                      Konfirmasi Hapus
+                    </h3>
+                  </div>
+
+                  <p className="text-gray-300 mb-6">
+                    Apakah Anda yakin ingin menghapus user{" "}
+                    <span className="font-semibold text-white">
+                      {showDeleteModal.name}
+                    </span>
+                    ? Tindakan ini tidak dapat dibatalkan.
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowDeleteModal(null)}
+                      className="flex-1 px-4 py-2.5 bg-gray-600/20 hover:bg-gray-600/40 border border-gray-500/30 rounded-lg text-gray-300 hover:text-white transition-all font-medium"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={() => handleDeleteUser(showDeleteModal.id)}
+                      className="flex-1 px-4 py-2.5 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 rounded-lg text-red-400 hover:text-red-300 transition-all font-medium"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* SETTINGS TAB */}
           {activeTab === "settings" && (

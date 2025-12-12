@@ -75,9 +75,6 @@ const AdminSidebar = ({ pendingCount = 0, onTabChange, activeTab }) => {
       color: "text-blue-400",
     },
   ];
-      color: "text-blue-400",
-    },
-  ];
 
   const handleLogout = () => {
     logout();
