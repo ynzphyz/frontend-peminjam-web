@@ -38,15 +38,18 @@ const Login = () => {
       // Backend returns: { success, message, data: { token, user } }
       const responseData = response.data?.data || response.data;
       const { token, user } = responseData;
-      const { email, name, role } = user || {};
+      const { email, name, role, profile_completed } = user || {};
       
-      console.log("Parsed user:", { email, name, role, token });
+      console.log("Parsed user:", { email, name, role, profile_completed, token });
 
       // Save user to context with token
-      login({ email, name, role, token });
+      login({ email, name, role, profile_completed, token });
 
-      // Redirect based on role
-      if (role === "admin") {
+      // Check if profile is completed
+      if (profile_completed === false) {
+        // Redirect to complete profile
+        navigate("/complete-profile");
+      } else if (role === "admin") {
         navigate("/admin");
       } else {
         navigate("/dashboard");
@@ -81,10 +84,14 @@ const Login = () => {
       // Backend returns: { success, message, data: { token, user } }
       const responseData = response.data?.data || response.data;
       const { token, user } = responseData;
-      const { email: eResp, name, role } = user || {};
-      login({ email: eResp, name, role, token });
+      const { email: eResp, name, role, profile_completed } = user || {};
+      login({ email: eResp, name, role, profile_completed, token });
 
-      if (role === "admin") {
+      // Check if profile is completed
+      if (profile_completed === false) {
+        // Redirect to complete profile
+        navigate("/complete-profile");
+      } else if (role === "admin") {
         navigate("/admin");
       } else {
         navigate("/dashboard");

@@ -25,6 +25,11 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.setItem("user", JSON.stringify(userData));
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+    sessionStorage.setItem("user", JSON.stringify(userData));
+  };
+
   const logout = () => {
     setUser(null);
     sessionStorage.removeItem("user");
@@ -32,6 +37,7 @@ export const AuthProvider = ({ children }) => {
 
   const isAdmin = user?.role === "admin";
   const isAuthenticated = user !== null;
+  const isProfileCompleted = user?.profile_completed === true;
 
   return (
     <AuthContext.Provider
@@ -39,9 +45,11 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         login,
+        updateUser,
         logout,
         isAdmin,
         isAuthenticated,
+        isProfileCompleted,
       }}
     >
       {children}

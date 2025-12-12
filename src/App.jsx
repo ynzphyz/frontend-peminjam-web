@@ -15,6 +15,7 @@ import AuthLayout from "./components/layout/AuthLayout";
 // Import Pages
 import Login from "./components/pages/Login";
 import Register from "./components/pages/Register";
+import CompleteProfile from "./components/pages/CompleteProfile";
 import AdminDashboard from "./components/pages/AdminDashboard";
 import HomePage from "./components/pages/HomePage";
 import Peminjaman from "./components/pages/Peminjaman";
@@ -59,6 +60,18 @@ function App() {
                 >
                   <Route index element={<HomePage />} />
                 </Route>
+                
+                {/* Complete Profile Route (after Google OAuth) */}
+                <Route
+                  path="/complete-profile"
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <CompleteProfile />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  }
+                />
                 
                 {/* Admin Routes without Layout (standalone design) */}
                 <Route
