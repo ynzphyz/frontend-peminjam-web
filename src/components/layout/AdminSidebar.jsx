@@ -91,23 +91,23 @@ const AdminSidebar = ({ pendingCount = 0, onTabChange, activeTab }) => {
       initial={{ x: -300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-[#0a183d] via-[#0f1b35] to-[#1a2a4a] border-r border-blue-500/20 overflow-y-auto z-50 scrollbar-hide"
-      style={{
-        scrollbarWidth: 'none', /* Firefox */
-        msOverflowStyle: 'none', /* IE and Edge */
-      }}
+      className="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-[#0a183d] via-[#0f1b35] to-[#1a2a4a] border-r border-blue-500/20 z-50 flex flex-col"
     >
       {/* Logo/Brand */}
-      <div className="p-6 border-b border-blue-500/20">
-        <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+      <div className="p-4 border-b border-blue-500/20">
+        <h1 className="text-xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
           ADMIN PANEL
         </h1>
         <p className="text-xs text-gray-400 mt-1">SMKN 7 Semarang</p>
       </div>
 
       {/* Main Menu */}
-      <nav className="p-4 space-y-2">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+      <nav className="p-3 space-y-1 flex-1 overflow-y-auto scrollbar-hide"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
           Main Menu
         </p>
         {menuItems.map((item) => {
@@ -120,7 +120,7 @@ const AdminSidebar = ({ pendingCount = 0, onTabChange, activeTab }) => {
               onClick={() => onTabChange(item.id)}
               whileHover={{ x: 5 }}
               whileTap={{ scale: 0.98 }}
-              className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-medium transition-all relative ${
+              className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl font-medium transition-all relative ${
                 isActive
                   ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
                   : "text-gray-400 hover:text-white hover:bg-blue-600/10"
@@ -145,11 +145,11 @@ const AdminSidebar = ({ pendingCount = 0, onTabChange, activeTab }) => {
       </nav>
 
       {/* External Links */}
-      <div className="px-4 py-4 border-t border-blue-500/20">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+      <div className="px-3 py-3 border-t border-blue-500/20">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
           Quick Actions
         </p>
-        <div className="space-y-2">
+        <div className="space-y-1">
           {externalLinks.map((link) => {
             const Icon = link.icon;
             return (
@@ -157,7 +157,7 @@ const AdminSidebar = ({ pendingCount = 0, onTabChange, activeTab }) => {
                 <motion.div
                   whileHover={{ x: 5 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-blue-600/10 transition-all"
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-blue-600/10 transition-all"
                 >
                   <Icon size={20} className={link.color} />
                   <span className="text-sm font-medium">{link.label}</span>
@@ -169,22 +169,18 @@ const AdminSidebar = ({ pendingCount = 0, onTabChange, activeTab }) => {
       </div>
 
       {/* Logout */}
-      <div className="p-4 border-t border-blue-500/20">
+      <div className="p-3 border-t border-blue-500/20">
         <motion.button
           onClick={handleLogout}
           whileHover={{ x: 5 }}
           whileTap={{ scale: 0.98 }}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-600/10 transition-all font-medium"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-600/10 transition-all font-medium"
         >
           <LogOut size={20} />
           <span className="text-sm">Logout</span>
         </motion.button>
       </div>
 
-      {/* Version Info */}
-      <div className="p-4 text-center">
-        <p className="text-xs text-gray-600">Version 1.0.0</p>
-      </div>
     </motion.aside>
   );
 };

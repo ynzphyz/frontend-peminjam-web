@@ -60,23 +60,17 @@ function App() {
                   <Route index element={<HomePage />} />
                 </Route>
                 
-                {/* Admin Routes with Layout (keeps Navbar visible) */}
+                {/* Admin Routes without Layout (standalone design) */}
                 <Route
+                  path="/admin"
                   element={
                     <ProtectedRoute requiredRole="admin">
-                      <Layout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route
-                    path="/admin"
-                    element={
                       <PageTransition>
                         <AdminDashboard />
                       </PageTransition>
-                    }
-                  />
-                </Route>
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Protected Routes with Layout */}
                 <Route

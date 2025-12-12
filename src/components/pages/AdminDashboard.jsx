@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 // eslint-disable-next-line no-unused-vars
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart3,
   Users,
@@ -18,17 +18,23 @@ import {
   Package,
   UserCheck,
   Calendar,
+  User,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { fetchStats } from "../../utils/api";
 import AdminSidebar from "../layout/AdminSidebar";
 import Reports from "./Reports";
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [pendingPeminjaman, setPendingPeminjaman] = useState([]);
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   // Debug logging
   console.log("🔍 AdminDashboard - Current user:", user);
@@ -120,6 +126,35 @@ const AdminDashboard = () => {
     };
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setAccountDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-[#0a183d] via-[#0f1b35] to-[#1a2a4a] overflow-hidden">
       {/* Sidebar */}
@@ -184,13 +219,130 @@ const AdminDashboard = () => {
                     </span>
                   </motion.button>
                 )}
+
+                {/* Account Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                  <motion.button
+                    onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30 rounded-lg hover:border-blue-500/50 transition-all"
+                  >
+                    {/* Avatar */}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
+                      {getInitials(user?.name)}
+                    </div>
+                    
+                    {/* User Info */}
+                    <div className="text-left hidden sm:block">
+                      <p className="text-sm font-semibold text-white">
+                        {user?.name || "Admin"}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {user?.email || "admin@smkn7.id"}
+                      </p>
+                    </div>
+
+                    {/* Chevron */}
+                    <ChevronDown
+                      size={16}
+                      className={`text-gray-400 transition-transform ${
+                        accountDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </motion.button>
+
+                  {/* Dropdown Menu */}
+                  <AnimatePresence>
+                    {accountDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 mt-2 w-64 bg-gradient-to-br from-[#0f2855] to-[#051530] border border-blue-500/30 rounded-xl shadow-2xl shadow-blue-900/50 overflow-hidden z-50"
+                      >
+                        {/* User Info Header */}
+                        <div className="p-4 border-b border-blue-500/20 bg-blue-600/10">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg">
+                              {getInitials(user?.name)}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-white font-semibold text-sm">
+                                {user?.name || "Admin User"}
+                              </p>
+                              <p className="text-gray-400 text-xs truncate">
+                                {user?.email || "admin@smkn7.id"}
+                              </p>
+                              <span className="inline-block mt-1 px-2 py-0.5 bg-cyan-500/20 text-cyan-300 text-xs rounded-full font-medium">
+                                {user?.role === "admin" ? "Administrator" : "User"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Menu Items */}
+                        <div className="p-2">
+                          <button
+                            onClick={() => {
+                              setActiveTab("settings");
+                              setAccountDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-blue-600/20 transition-all text-left"
+                          >
+                            <User size={18} className="text-blue-400" />
+                            <div>
+                              <p className="text-sm font-medium">Profile</p>
+                              <p className="text-xs text-gray-500">
+                                View and edit profile
+                              </p>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setActiveTab("settings");
+                              setAccountDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-blue-600/20 transition-all text-left"
+                          >
+                            <Settings size={18} className="text-cyan-400" />
+                            <div>
+                              <p className="text-sm font-medium">Settings</p>
+                              <p className="text-xs text-gray-500">
+                                Manage preferences
+                              </p>
+                            </div>
+                          </button>
+                        </div>
+
+                        {/* Logout */}
+                        <div className="p-2 border-t border-blue-500/20">
+                          <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-600/20 transition-all text-left"
+                          >
+                            <LogOut size={18} />
+                            <div>
+                              <p className="text-sm font-medium">Logout</p>
+                              <p className="text-xs text-red-500/70">
+                                Sign out of your account
+                              </p>
+                            </div>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-8 pb-20">
           {/* Animated Background */}
           <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 ml-64">
             <motion.div
