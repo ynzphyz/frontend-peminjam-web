@@ -161,17 +161,35 @@ export const deleteHistory = async (id) => {
   });
 };
 
-// Note: Stats endpoint not implemented in backend yet
+// Fetch dashboard statistics
 export const fetchStats = async () => {
-  console.warn('⚠️ Stats endpoint not implemented in backend');
-  // Return mock data for now
-  return {
-    success: true,
-    data: {
-      totalPeminjaman: 0,
-      activePeminjaman: 0,
-      totalPengembalian: 0,
-      totalApproval: 0
+  console.log('📥 GET /stats');
+  try {
+    const response = await fetch(`${API_BASE_URL}/stats`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch stats: ${response.status}`);
     }
-  };
+
+    const result = await response.json();
+    console.log('✅ Stats fetched:', result);
+    return result;
+  } catch (error) {
+    console.error('❌ fetchStats failed:', error);
+    // Return fallback data on error
+    return {
+      success: true,
+      totalPeminjaman: 0,
+      totalUsers: 0,
+      pendingApproval: 0,
+      approvedCount: 0,
+      rejectedCount: 0
+    };
+  }
 };
+

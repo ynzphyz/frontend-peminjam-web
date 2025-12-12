@@ -13,6 +13,7 @@ import {
   X,
   FileText,
   Eye,
+  RefreshCw,
 } from "lucide-react";
 import { API_BASE_URL } from "../../utils/api";
 
@@ -33,17 +34,23 @@ const Reports = () => {
   const fetchPeminjaman = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      // Get token from sessionStorage (consistent with api.js)
+      let token = null;
+      try {
+        const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+        token = user?.token;
+      } catch (e) {
+        console.warn("Could not parse user from sessionStorage:", e);
+      }
       
       if (!token) {
-        console.error("No token found in localStorage");
-        alert("Anda harus login terlebih dahulu");
+        console.error("No token found - User might not be logged in");
         setPeminjaman([]);
         setLoading(false);
         return;
       }
 
-      console.log("Fetching peminjaman with token:", token.substring(0, 20) + "...");
+      console.log("📤 Fetching peminjaman...");
       
       const response = await fetch(`${API_BASE_URL}/peminjaman`, {
         method: "GET",
@@ -53,20 +60,19 @@ const Reports = () => {
         },
       });
       
-      console.log("Response status:", response.status);
+      console.log("📥 Response status:", response.status);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch peminjaman: ${response.status}`);
       }
       
       const result = await response.json();
-      console.log("Received data:", result);
+      console.log("✅ Received data:", result);
       
       const data = result.data || result || [];
       setPeminjaman(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Error fetching peminjaman:", error);
-      alert("Gagal mengambil data peminjaman: " + error.message);
+      console.error("❌ Error fetching peminjaman:", error);
       setPeminjaman([]);
     } finally {
       setLoading(false);
@@ -77,14 +83,23 @@ const Reports = () => {
   const filteredData = useMemo(() => {
     let filtered = peminjaman;
 
-    // Filter by status
+    // Filter by status (support both Indonesian and English)
     if (filterStatus === "pending") {
-      filtered = filtered.filter((item) => item.status === "pending");
+      filtered = filtered.filter((item) => 
+        item.status?.toLowerCase()?.trim() === "pending"
+      );
     } else if (filterStatus === "approved") {
-      filtered = filtered.filter((item) => item.status === "disetujui");
+      filtered = filtered.filter((item) => 
+        item.status?.toLowerCase()?.trim() === "disetujui" || 
+        item.status?.toLowerCase()?.trim() === "approved"
+      );
     } else if (filterStatus === "rejected") {
-      filtered = filtered.filter((item) => item.status === "ditolak");
+      filtered = filtered.filter((item) => 
+        item.status?.toLowerCase()?.trim() === "ditolak" || 
+        item.status?.toLowerCase()?.trim() === "rejected"
+      );
     }
+    // "all" filterStatus doesn't filter anything
 
     // Filter by search term
     if (searchTerm) {
@@ -105,16 +120,33 @@ const Reports = () => {
 
     setProcessingId(id);
     try {
-      const token = localStorage.getItem("token");
+      // Get token from sessionStorage
+      let token = null;
+      let userEmail = "";
+      try {
+        const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+        token = user?.token;
+        userEmail = user?.email || "";
+      } catch (e) {
+        console.warn("Could not parse user from sessionStorage:", e);
+      }
+
+      const peminjamanItem = peminjaman.find((p) => p.id === id);
+      if (!peminjamanItem) {
+        alert("Data peminjaman tidak ditemukan");
+        return;
+      }
       
-      // Create approval record
+      // Create approval request (sesuai backend ApprovalRequest)
       const approvalData = {
-        id_pinjam: id,
+        peminjaman_id: id,
         tanggal_persetujuan: new Date().toISOString().split("T")[0],
-        nama_peminjam: peminjaman.find((p) => p.id === id)?.nama || "",
-        pembuat_persetujuan: localStorage.getItem("userEmail") || "Admin",
+        nama_peminjam: peminjamanItem.nama || "",
+        pembuat_persetujuan: userEmail || "Admin",
         status_persetujuan: "disetujui",
       };
+
+      console.log("📤 Sending approval:", approvalData);
 
       const response = await fetch(`${API_BASE_URL}/approval`, {
         method: "POST",
@@ -126,22 +158,14 @@ const Reports = () => {
       });
 
       if (response.ok) {
-        // Update peminjaman status
-        await fetch(`${API_BASE_URL}/peminjaman/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ...peminjaman.find((p) => p.id === id),
-            status: "disetujui",
-          }),
-        });
-
-        // Refresh data
+        const result = await response.json();
+        console.log("✅ Approval success:", result);
+        
+        // Refresh data to get updated status from server
+        
+        // Refresh data to get updated status from server
         await fetchPeminjaman();
-        alert("Peminjaman berhasil disetujui!");
+        alert("✅ Peminjaman berhasil disetujui!\n\nNotifikasi WhatsApp dan surat telah dikirim.");
         setShowDetailModal(false);
       } else {
         const errorData = await response.json();
@@ -161,16 +185,34 @@ const Reports = () => {
 
     setProcessingId(id);
     try {
-      const token = localStorage.getItem("token");
+      // Get token from sessionStorage
+      let token = null;
+      let userEmail = "";
+      try {
+        const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+        token = user?.token;
+        userEmail = user?.email || "";
+      } catch (e) {
+        console.warn("Could not parse user from sessionStorage:", e);
+      }
 
-      // Create approval record with rejected status
+      const peminjamanItem = peminjaman.find((p) => p.id === id);
+      if (!peminjamanItem) {
+        alert("Data peminjaman tidak ditemukan");
+        return;
+      }
+
+      // Create approval request with rejected status (sesuai backend)
       const approvalData = {
-        id_pinjam: id,
+        peminjaman_id: id,
         tanggal_persetujuan: new Date().toISOString().split("T")[0],
-        nama_peminjam: peminjaman.find((p) => p.id === id)?.nama || "",
-        pembuat_persetujuan: localStorage.getItem("userEmail") || "Admin",
+        nama_peminjam: peminjamanItem.nama || "",
+        pembuat_persetujuan: userEmail || "Admin",
         status_persetujuan: "ditolak",
+        alasan: reason, // Include reason
       };
+
+      console.log("📤 Sending rejection:", approvalData);
 
       const response = await fetch(`${API_BASE_URL}/approval`, {
         method: "POST",
@@ -182,22 +224,12 @@ const Reports = () => {
       });
 
       if (response.ok) {
-        // Update peminjaman status
-        await fetch(`${API_BASE_URL}/peminjaman/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ...peminjaman.find((p) => p.id === id),
-            status: "ditolak",
-          }),
-        });
+        const result = await response.json();
+        console.log("✅ Rejection success:", result);
 
-        // Refresh data
+        // Refresh data to get updated status from server
         await fetchPeminjaman();
-        alert("Peminjaman berhasil ditolak!");
+        alert(`❌ Peminjaman berhasil ditolak!\n\nAlasan: ${reason}\n\nNotifikasi WhatsApp telah dikirim.`);
         setShowDetailModal(false);
       } else {
         const errorData = await response.json();
@@ -230,7 +262,19 @@ const Reports = () => {
         border: "border-green-500/40",
         label: "Disetujui",
       },
+      approved: {
+        bg: "bg-green-500/20",
+        text: "text-green-400",
+        border: "border-green-500/40",
+        label: "Disetujui",
+      },
       ditolak: {
+        bg: "bg-red-500/20",
+        text: "text-red-400",
+        border: "border-red-500/40",
+        label: "Ditolak",
+      },
+      rejected: {
         bg: "bg-red-500/20",
         text: "text-red-400",
         border: "border-red-500/40",
@@ -238,7 +282,7 @@ const Reports = () => {
       },
     };
 
-    const config = statusConfig[status] || statusConfig.pending;
+    const config = statusConfig[status?.toLowerCase()?.trim()] || statusConfig.pending;
     return (
       <span
         className={`px-3 py-1 rounded-full text-xs font-semibold border ${config.bg} ${config.text} ${config.border}`}
@@ -270,19 +314,62 @@ const Reports = () => {
               </p>
             </div>
           </div>
-          {filteredData.filter((item) => item.status === "pending").length >
-            0 && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="px-4 py-2 bg-orange-500/20 border border-orange-500/40 rounded-xl"
+
+          <div className="flex items-center gap-3">
+            {/* Stats Summary */}
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-2 bg-blue-500/20 border border-blue-500/40 rounded-lg">
+                <p className="text-blue-400 text-xs font-semibold">
+                  Total: {peminjaman.length}
+                </p>
+              </div>
+              <div className="px-3 py-2 bg-green-500/20 border border-green-500/40 rounded-lg">
+                <p className="text-green-400 text-xs font-semibold">
+                  Disetujui: {peminjaman.filter((item) => 
+                    item.status?.toLowerCase()?.trim() === "disetujui" || 
+                    item.status?.toLowerCase()?.trim() === "approved"
+                  ).length}
+                </p>
+              </div>
+              <div className="px-3 py-2 bg-red-500/20 border border-red-500/40 rounded-lg">
+                <p className="text-red-400 text-xs font-semibold">
+                  Ditolak: {peminjaman.filter((item) => 
+                    item.status?.toLowerCase()?.trim() === "ditolak" || 
+                    item.status?.toLowerCase()?.trim() === "rejected"
+                  ).length}
+                </p>
+              </div>
+            </div>
+
+            {/* Refresh Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={fetchPeminjaman}
+              disabled={loading}
+              className="p-3 bg-blue-600/20 border border-blue-500/40 rounded-lg hover:bg-blue-600/30 transition disabled:opacity-50"
             >
-              <p className="text-orange-400 font-semibold">
-                {filteredData.filter((item) => item.status === "pending").length}{" "}
-                Pending
-              </p>
-            </motion.div>
-          )}
+              <RefreshCw size={20} className={`text-blue-400 ${loading ? 'animate-spin' : ''}`} />
+            </motion.button>
+
+            {/* Pending Badge */}
+            {peminjaman.filter((item) => 
+              item.status?.toLowerCase()?.trim() === "pending"
+            ).length > 0 && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="px-4 py-2 bg-orange-500/20 border border-orange-500/40 rounded-xl"
+              >
+                <p className="text-orange-400 font-semibold">
+                  {peminjaman.filter((item) => 
+                    item.status?.toLowerCase()?.trim() === "pending"
+                  ).length}{" "}
+                  Pending
+                </p>
+              </motion.div>
+            )}
+          </div>
         </div>
 
         {/* Search and Filter */}
@@ -562,7 +649,7 @@ const Reports = () => {
                       Nomor Telepon
                     </p>
                     <p className="text-white font-semibold">
-                      {selectedItem.nomor_telepon || "-"}
+                      {selectedItem.no_wa || selectedItem.nomor_telepon || "-"}
                     </p>
                   </div>
                 </div>

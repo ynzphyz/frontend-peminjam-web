@@ -95,11 +95,26 @@ const AdminDashboard = () => {
     let mounted = true;
     const fetchPendingPeminjaman = async () => {
       try {
+        // Get token from sessionStorage
+        let token = null;
+        try {
+          const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+          token = user?.token;
+        } catch (e) {
+          console.warn("Could not parse user from sessionStorage:", e);
+        }
+
+        const headers = {
+          "Content-Type": "application/json",
+        };
+
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
         const response = await fetch("http://localhost:8080/peminjaman", {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: headers,
         });
 
         if (!response.ok) throw new Error("Failed to fetch");
@@ -232,7 +247,7 @@ const AdminDashboard = () => {
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
                       {getInitials(user?.name)}
                     </div>
-                    
+
                     {/* User Info */}
                     <div className="text-left hidden sm:block">
                       <p className="text-sm font-semibold text-white">
@@ -276,7 +291,9 @@ const AdminDashboard = () => {
                                 {user?.email || "admin@smkn7.id"}
                               </p>
                               <span className="inline-block mt-1 px-2 py-0.5 bg-cyan-500/20 text-cyan-300 text-xs rounded-full font-medium">
-                                {user?.role === "admin" ? "Administrator" : "User"}
+                                {user?.role === "admin"
+                                  ? "Administrator"
+                                  : "User"}
                               </span>
                             </div>
                           </div>
@@ -413,7 +430,7 @@ const AdminDashboard = () => {
                     </h2>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <Link to="/form-approval">
+                      <button onClick={() => setActiveTab("users")}>
                         <motion.div
                           whileHover={{ scale: 1.03, y: -5 }}
                           whileTap={{ scale: 0.98 }}
@@ -421,20 +438,15 @@ const AdminDashboard = () => {
                         >
                           <div className="flex items-center gap-3 mb-3">
                             <div className="p-2 rounded-lg bg-blue-600/30">
-                              <ClipboardList
-                                size={20}
-                                className="text-blue-200"
-                              />
+                              <UserCheck size={20} className="text-blue-200" />
                             </div>
                             <h3 className="text-base font-semibold text-blue-200 group-hover:text-cyan-300 transition-colors">
-                              Form Approval
+                              User Management
                             </h3>
                           </div>
-                          <p className="text-xs text-gray-400">
-                            Review peminjaman
-                          </p>
+                          <p className="text-xs text-gray-400">Kelola user</p>
                         </motion.div>
-                      </Link>
+                      </button>
 
                       <Link to="/riwayat">
                         <motion.div
@@ -616,9 +628,7 @@ const AdminDashboard = () => {
           )}
 
           {/* REPORTS TAB */}
-          {activeTab === "reports" && (
-            <Reports />
-          )}
+          {activeTab === "reports" && <Reports />}
 
           {/* APPROVALS TAB */}
           {activeTab === "approvals" && (
@@ -663,13 +673,19 @@ const AdminDashboard = () => {
               <div className="text-center py-12">
                 <Users size={48} className="text-gray-500 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  Coming Soon
+                  Fitur Segera Hadir
                 </h3>
-                <p className="text-gray-400">
-                  Fitur manajemen user akan segera tersedia
+                <p className="text-gray-400 mb-4">
+                  User Management untuk mengelola admin dan user
                 </p>
-                <div className="mt-6 text-sm text-gray-500">
+                <div className="text-sm text-gray-500">
                   <p>Total Users: {stats[1].value}</p>
+                  <p className="mt-2">Backend endpoint sudah siap:</p>
+                  <ul className="list-disc list-inside mt-2 text-left max-w-md mx-auto">
+                    <li>GET /users - List semua user</li>
+                    <li>PUT /users/:id/role - Update role</li>
+                    <li>DELETE /users/:id - Hapus user</li>
+                  </ul>
                 </div>
               </div>
             </motion.div>

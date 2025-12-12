@@ -69,15 +69,12 @@ const AdminSidebar = ({ pendingCount = 0, onTabChange, activeTab }) => {
 
   const externalLinks = [
     {
-      label: "Form Approval",
-      icon: Plus,
-      path: "/form-approval",
-      color: "text-cyan-400",
-    },
-    {
       label: "Riwayat",
       icon: History,
       path: "/riwayat",
+      color: "text-blue-400",
+    },
+  ];
       color: "text-blue-400",
     },
   ];
